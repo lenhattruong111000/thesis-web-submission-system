@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Manuscript Submission</title>
+</head>
+<body>
+<h1>Submission Form</h1>
+	<hr>
+	
+	<form th:action="@{/saveSubmissionInfor}" method="post" enctype="multipart/form-data" th:object="${manuscript}">
+		<table>
+		<tr align="left" hidden="">
+			<th> Author ID:</th>
+			<th> <input type="text"  name="authorid" ></th>
+		</tr>
+		<tr align="left">
+			<th>Title:</th>
+			<th > <input type="text" name="title" required="required" th:field="*{sTitle}"></th>
+		</tr>
+		
+		<tr align="left">
+			<th>Major: </th>
+			<th ><select name="major" th:field="*{sMajor}">
+				<option value="computer_science"> Computer Science </option>
+				<option value="data_science"> Data Science</option>
+				<option value="network_science"> Network Science</option>
+				<option value="security_science"> Security Science</option>
+				<option value="biology">Biology</option>
+				<option value="social">Social</option>
+				<option value="math"> Math </option>
+				<option value="physic">Physic</option>
+				<option value="literature"> Literature</option>
+				<option value="astrology"> Astrology</option>
+				<option value="medicine"> Medicine</option>
+			</select></th>
+		</tr>
+		
+		<tr align="left" hidden="">
+			<th> Author Name:</th>
+			<th > <input type="text" name="authorName" ></th>
+		</tr>
+		
+		<tr align="left" >
+			<th>Workplace:</th>
+			<th> <input type="text" required="required" name="authorworkplace" th:field="*{sWorkplace}"> </th>
+		</tr>
+		
+		<tr align="left">
+			<th>Abstract paragraph: </th>
+			<th > <textarea rows="10" cols="50" th:field="*{sAbstract}"></textarea> </th>
+		</tr>
+		
+		<tr align="left">
+			 <th>Upload Manuscript:</th>
+			 <th> <input type="file"  name="file"  required="required"> </th>
+		</tr>
+		
+		<tr hidden="">
+			<th> Upload Scientific paper:</th> 
+			<th><input type="file"> </th>
+		</tr>
+		
+		<tr align="left">
+			<th> <input type="submit" value="Submit"> </th>
+		</tr>
+		</table>
+		
+	</form>
+</body>
+</html>
