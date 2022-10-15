@@ -16,7 +16,7 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
+          <a class="nav-link active" aria-current="page" href="/">Home</a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -104,18 +104,18 @@
 			<td th:text="${manuscript.sAbstract}"></td>
 			<td th:text="${manuscript.sState}"></td>
 			
-			<!--
+			
 			<td>	
 			<div >
 				<table>
 					<tr>
-						<th><a th:href="@{/updateStateSubmission/{id}(id=${manuscript.sId})}"> <button type="button" class="btn btn-outline-primary">Update</button></a> 
+						<th><a th:href="@{/newCoAuthorForm/{id}(id=${manuscript.sId})}"> <button type="button" class="btn btn-outline-primary">Add Co-Author</button></a> 
 					</tr>
 				</table>
 			</div>
 			 
 				</td>
-			-->
+			
 		</tr>
 	</tbody>
 	</table>
@@ -144,6 +144,7 @@
 			<th>s_Workplace
 			<th>s_Abstract
 			<th>s_State
+			<th>s_Comment
 		</tr>
 	</thead>
 	<tbody align="center">
@@ -156,13 +157,14 @@
 			<td th:text="${manuscript.sWorkplace}"></td>
 			<td th:text="${manuscript.sAbstract}"></td>
 			<td th:text="${manuscript.sState}"></td>
+			<td th:text="${manuscript.sComment}"></td>
 		</tr>
 	</tbody>
 	</table>
 </div>
 
 <hr>
-<!-- accepted List manuscript -->
+<!-- rejected List manuscript -->
 
 <div>
 	<div align="left">
@@ -185,6 +187,7 @@
 			<th>s_Workplace
 			<th>s_Abstract
 			<th>s_State
+			<th>s_Comment
 		</tr>
 	</thead>
 	<tbody align="center">
@@ -197,6 +200,7 @@
 			<td th:text="${manuscript.sWorkplace}"></td>
 			<td th:text="${manuscript.sAbstract}"></td>
 			<td th:text="${manuscript.sState}"></td>
+			<td th:text="${manuscript.sComment}"></td>
 			
 		</tr>
 	</tbody>

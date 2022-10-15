@@ -53,4 +53,27 @@ public class SubmissionInforServiceImpl implements SubmissionInforService {
 		
 	}
 
+	@Override
+	public void updateMauscriptComment(String comment, long sid) {
+		this.submissionInforReposity.updateComment(comment, sid);
+		
+	}
+	
+	@Override
+	public List<SubmissionInfor> getManuscriptReviewListByReviewerId(long id) {
+		
+		return submissionInforReposity.getManuscriptReviewListByReviewerId(id);
+	}
+
+	@Override
+	public List<SubmissionInfor> getWaitingManuscriptReviewListByReviewerUsername(String username) {
+		return submissionInforReposity.getWaitingManuscriptReviewListByReviewerUsername(username);
+	}
+
+	@Override
+	public void setMaxAllowedPacket() {
+		this.submissionInforReposity.setMaxAllowedPacket();
+		
+	}
+
 }

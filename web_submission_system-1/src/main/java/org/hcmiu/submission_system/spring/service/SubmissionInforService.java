@@ -20,5 +20,15 @@ public interface SubmissionInforService {
     public void setNameAndIdForAuthor(long authorid, String authorName, long sid);
     
     public void updateStateSubmission(String state, long sid);
+    
+    public void updateMauscriptComment(String comment, long sid);
+    
+    //get ManuscriptReview by reviewer Id
+    public List<SubmissionInfor> getManuscriptReviewListByReviewerId(long id);
+    
+    //get ManuscriptReview by reviewer Username
+    public List<SubmissionInfor> getWaitingManuscriptReviewListByReviewerUsername(String username);
+    
+    public void setMaxAllowedPacket();
 	
 }

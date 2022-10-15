@@ -36,6 +36,9 @@ public class AppUser {
     
     @Column(name = "userPhone", length = 11, nullable = true )
     private String userPhone;
+    
+    @Column(name = "verificationCode", length = 64)
+    private String verificationCode;
 
 	public Long getUserId() {
 		return userId;
@@ -93,6 +96,14 @@ public class AppUser {
 		this.userPhone = userPhone;
 	}
 
-   
+	public String getVerificationCode() {
+		return verificationCode;
+	}
+
+	public void setVerificationCode(String verificationCode) {
+		this.verificationCode = verificationCode;
+	}
+
+	
 
 }

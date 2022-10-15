@@ -43,36 +43,37 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		// pages with login require
 		http.authorizeRequests().antMatchers("/", "/login", "/logout").permitAll();
 
-		//user role author and editor can access /userinfor
+		//user role author and editor can access
 		http.authorizeRequests().antMatchers("/userInfo").access("hasAnyRole('ROLE_AUTHOR', 'ROLE_EDITOR')");
 
 		// only editor can access this page
 		http.authorizeRequests().antMatchers("/editor").access("hasRole('ROLE_EDITOR')");
+		
+		//only reviewer can access this page
+		http.authorizeRequests().antMatchers("/reviewer").access("hasRole('ROLE_REVIEWER')");
 
-		// Khi người dùng đã login, với vai trò XX.
-		// Nhưng truy cập vào trang yêu cầu vai trò YY,
-		// Ngoại lệ AccessDeniedException sẽ ném ra.
+		//throw expection if login with wrong role
 		http.authorizeRequests().and().exceptionHandling().accessDeniedPage("/403");
 
-		// Cấu hình cho Login Form.
+		// set up for login form.
 		http.authorizeRequests().and().formLogin()//
-				// Submit URL của trang login
+				// Submit URL for login page
 				.loginProcessingUrl("/j_spring_security_check") // Submit URL
 				.loginPage("/login")//
 				.defaultSuccessUrl("/userAccountInfo")//
 				.failureUrl("/login?error=true")//
 				.usernameParameter("username")//
 				.passwordParameter("password")
-				// Cấu hình cho Logout Page.
+				// set up for logout page.
 				.and().logout().logoutUrl("/logout").logoutSuccessUrl("/logoutSuccessful");
 
-		// Cấu hình Remember Me.
+		// set up for remember me.
 		http.authorizeRequests().and() //
 				.rememberMe().tokenRepository(this.persistentTokenRepository()) //
 				.tokenValiditySeconds(1 * 24 * 60 * 60); // 24h
 
 	}
-
+	
 	@Bean
 	public PersistentTokenRepository persistentTokenRepository() {
 		JdbcTokenRepositoryImpl db = new JdbcTokenRepositoryImpl();

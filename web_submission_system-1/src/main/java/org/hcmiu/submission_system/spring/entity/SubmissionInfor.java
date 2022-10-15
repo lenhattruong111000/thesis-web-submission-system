@@ -33,10 +33,19 @@ public class SubmissionInfor {
 	@Column(name ="sWorkplace", nullable =true, length = 100)
 	private String sWorkplace;
 	
+	@Column(name = "sCountry", length = 50, nullable = true)
+	private String sCountry;
+	
+	@Column(name = "sKeyword", length = 255, nullable = true)
+	private String sKeyword;
+	
 	@Column(name ="sAbstract", nullable =true, length = 255)
 	private String sAbstract;
 	
-	@Column(name ="sState", nullable =true)
+	@Column(name = "sComment", length = 255, nullable = true)
+	private String sComment;
+	
+	@Column(name ="sState", length = 30 ,nullable =true)
 	private String sState;
 
 	public Long getsId() {
@@ -101,6 +110,30 @@ public class SubmissionInfor {
 
 	public void setsState(String sState) {
 		this.sState = sState;
+	}
+
+	public String getsCountry() {
+		return sCountry;
+	}
+
+	public void setsCountry(String sCountry) {
+		this.sCountry = sCountry;
+	}
+
+	public String getsKeyword() {
+		return sKeyword;
+	}
+
+	public void setsKeyword(String sKeyword) {
+		this.sKeyword = sKeyword;
+	}
+
+	public String getsComment() {
+		return sComment;
+	}
+
+	public void setsComment(String sComment) {
+		this.sComment = sComment;
 	}
 	
 	
