@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h1>Sending Manuscript</h1>
+
+<div>
+	<form action="/sendManuscript" method="post" th:object="${manuscriptReview}">
+		<table>
+			<tr>
+				<th>Deadline</th>
+				  
+				<th><input type="date" name="deadlineDate" required="required" ></th>
+				<th><input type="time" name="deadlineTime" required="required" >  </th>
+				
+			</tr>
+			
+			<tr>
+				<th>Comment:</th>
+				<th> <textarea rows="10" cols="50" name="editorComment" th:field="${manuscriptReview.editorComment}"></textarea> </th>
+			</tr>
+			
+			<tr>
+				<th>
+					<input type="submit" value="send">
+				</th>
+			</tr>
+		</table>
+		
+		
+		
+		
+		
+	</form>
+</div>
+</body>
+</html>
