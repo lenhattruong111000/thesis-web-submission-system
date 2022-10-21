@@ -158,6 +158,18 @@
 			<td th:text="${manuscript.sAbstract}"></td>
 			<td th:text="${manuscript.sState}"></td>
 			<td th:text="${manuscript.sComment}"></td>
+			
+			<td>	
+			<div >
+				<table>
+					<tr>
+						<th><a th:href="@{/resubmitManuscript/{id}(id=${manuscript.sId})}"> <button type="button" class="btn btn-outline-primary">Re-Submit</button></a> 
+					</tr>
+				</table>
+			</div>
+			 
+				</td>
+			
 		</tr>
 	</tbody>
 	</table>

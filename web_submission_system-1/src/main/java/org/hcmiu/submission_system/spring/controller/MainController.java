@@ -52,13 +52,19 @@ public class MainController {
 		return "welcomePage";
 	}
 	
+	@RequestMapping(value = "/logoutSuccessful", method = RequestMethod.GET)
+	public String logoutSuccessfulPage(Model model) {
+		model.addAttribute("title", "Logout");
+		return "welcomePage";
+	}
+	
 	@RequestMapping("/register_success")
 	public String registerSuccess() {
 		return "register_success";
 	}
 	
 	
-	//editor page
+	//=========================================Editor Page================================================//
 	@RequestMapping(value = "/editor", method = RequestMethod.GET)
 	public String adminPage(Model model, Principal principal) {
 		
@@ -84,11 +90,23 @@ public class MainController {
 		//view accepted manuscript
 		ArrayList<SubmissionInfor> acceptedList = new ArrayList<SubmissionInfor>();
 		for(int i=0; i<allList.size();i++) {
-			if(allList.get(i).getsState().equals("accept")) {
+			if(allList.get(i).getsState().equals("accept_with_small_changeable")||
+					allList.get(i).getsState().equals("accept_with_changeable")	) {
 				acceptedList.add(allList.get(i));
 			}
 		}
 		model.addAttribute("acceptedListManuscripts", acceptedList);
+		
+		//view rejected list
+		ArrayList<SubmissionInfor> resubmitList = new ArrayList<SubmissionInfor>();
+		for(int i=0; i<allList.size();i++) {
+			if(allList.get(i).getsState().equals("re-submit")) {
+				resubmitList.add(allList.get(i));
+			}
+		}
+		model.addAttribute("resubmitListManuscripts", resubmitList);
+				
+				
 		
 		//view rejected list
 		ArrayList<SubmissionInfor> rejectedList = new ArrayList<SubmissionInfor>();
@@ -104,7 +122,7 @@ public class MainController {
 		return "adminPage";
 	}
 	
-	//reviewer Page
+	//============================================Reviewer Page=============================================//
 	@RequestMapping(value = "/reviewer", method = RequestMethod.GET)
 	public String ReviewerPage(Model model, Principal principal) {
 		
@@ -123,12 +141,7 @@ public class MainController {
 		return "loginPage";
 	}
 
-	@RequestMapping(value = "/logoutSuccessful", method = RequestMethod.GET)
-	public String logoutSuccessfulPage(Model model) {
-		model.addAttribute("title", "Logout");
-		return "welcomePage";
-	}
-
+	//========================================Author Page====================================================//
 	@RequestMapping(value = "/userInfo", method = RequestMethod.GET)
 	public String userInfo(Model model, Principal principal) {
 
@@ -169,7 +182,8 @@ public class MainController {
 		// view accepted list
 		ArrayList<SubmissionInfor> accpetedList = new ArrayList<SubmissionInfor>();
 		for(int i=0; i<allList.size();i++) {
-			if(allList.get(i).getsState().equals("accept") &&
+			if(allList.get(i).getsState().equals("accept_with_small_changeable") || 
+					allList.get(i).getsState().equals("accept_with_changeable") &&
 					allList.get(i).getAppUser().getUserId().equals(appUser.getUserId())) {
 				accpetedList.add(allList.get(i));
 			}
@@ -210,27 +224,13 @@ public class MainController {
 		return "403Page";
 	}
 	
-	//Register Author Account
+	//======================================Register Author Account Page======================================//
 	@GetMapping("/registerForm")
 	public String getAuthorRegisterForm(Model model) {
 		AppUser appUser = new AppUser();
 		model.addAttribute("author",appUser);
 		return "registerForm";
 	}
-	
-//	@PostMapping("/saveRegisterForm")
-//	public String saveAuthor(@ModelAttribute("author") AppUser appUser, Principal principal) {
-//		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-//		appUser.setEnabled(true);
-//		String encrytedPassword = encoder.encode(appUser.getEncrytedPassword());
-//		appUser.setEncrytedPassword(encrytedPassword);
-//		//save new author to database
-//		appUserService.saveAppUser(appUser);
-//		//set role for author
-//		System.out.println("author id: "+ appUser.getUserId());
-//		userRoleServiceImpl.setAuthorRole(appUser.getUserId());
-//		return "redirect:/userInfo";
-//	}
 	
 	@PostMapping("/saveRegisterForm")
 	public String saveAuthor(@ModelAttribute("author") AppUser appUser, Principal principal, HttpServletRequest request) throws UnsupportedEncodingException, MessagingException {

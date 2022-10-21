@@ -84,6 +84,8 @@ public class SubmissionController {
 	public String errorEmail() {
 		return "emailError";
 	}
+	
+	//======================================Submission Manuscript==================================//
 	@GetMapping("/submissionForm")
 	public String getSubmissionForm(Model model, Principal principal) {
 		submissionInforService.setMaxAllowedPacket();
@@ -133,7 +135,7 @@ public class SubmissionController {
 		
 		return "redirect:/userInfo";
 	}
-	
+	//=======================================Co-Author====================================================//
 	//add co-author
 	private long sid=0;
 	@GetMapping("/newCoAuthorForm/{id}")
@@ -182,11 +184,14 @@ public class SubmissionController {
 		this.coAuthorService.deleteCoAuthorById(id);
 		return "redirect:/userInfo";
 	}
+	
+	//===================================Update State of Manuscript==========================================//
+	
 	//update state
-	private long sidForUpdate;
+	//private long sidForUpdate;
 	@GetMapping("/updateStateSubmission/{id}")
 	public String getUpdateStateSubmission(@PathVariable(value = "id") long id,Model model) {
-		sidForUpdate=id;
+		//sidForUpdate=id;
 		//get all reviewer 
 		List<AppUser> reviewerList= appUserService.getAllReviewer();
 		model.addAttribute("reviewerList",reviewerList);
@@ -194,6 +199,30 @@ public class SubmissionController {
 		//get review list by manuscript id
 		List<ManuscriptReview> reviewList= reviewService.getReviewListByManuscriptId(id);
 		model.addAttribute("reviewList", reviewList);
+		
+		//get all reviewer comment with id of manuscript
+		String allComment = ""; 
+		try {
+			if(reviewList!= null) {
+				for(int i=0; i<reviewList.size();i++) {
+					int num=i+1;
+					
+					allComment= allComment+ "Reviewer "+ num +": \n"+
+					reviewList.get(i).getReviewerComment()+"\n";
+					
+					num=0;
+				}
+				allComment=allComment+"Editor messages: \n";
+				submissionInforService.updateMauscriptComment(allComment, id);
+				allComment="";
+			}
+			
+			
+		}catch(Exception e) {
+			System.out.println("not review yet");
+		}
+		
+	
 		
 		//get submission information by s_id
 		SubmissionInfor submissionInfor = submissionInforService.getSubmissionInforById(id);
@@ -205,7 +234,6 @@ public class SubmissionController {
 	 private static final String EMAIL_ADDRESS = "jobandjob336@gmail.com";
 	 private static final String KEY = "35e1466e-6eb2-40e9-adfb-328ec2b79f2b";
 //	 private static final String PRODUCT = Products.EDUCATION; // BUSINESSES or EDUCATION, depending on your Copyleaks account type.
-	
 	 
 	 
 	@RequestMapping(value="/resultChecking", method = RequestMethod.GET)
@@ -288,16 +316,20 @@ public class SubmissionController {
 	
 	// save update state and add the comment
 	@PostMapping("/saveUpdateState")
-	public String saveUpdateState(@ModelAttribute("manuscript") SubmissionInfor submissionInfor) {
+	public String saveUpdateState(@ModelAttribute("manuscript") SubmissionInfor submissionInfor) throws UnsupportedEncodingException, MessagingException {
 		System.out.println("mauscript state"+submissionInfor.getsState());
 		System.out.println("mauscript id"+ submissionInfor.getsId());
 		submissionInforService.updateStateSubmission(submissionInfor.getsState(), submissionInfor.getsId());
 		submissionInforService.updateMauscriptComment(submissionInfor.getsComment(), submissionInfor.getsId());
+		
+		//get mauscript and sent email about its state, comment for author
+		SubmissionInfor submission = submissionInforService.getSubmissionInforById(submissionInfor.getsId());
+		appUserService.emailForNotifyAuthorAboutSubmissionState(submission.getAppUser(), submission);
 		return "redirect:/editor";
 	}
 	
 	@GetMapping("/downloadfile/{id}")
-	 public void downloadFile(@PathVariable(value = "id") long id , Model model, HttpServletResponse response) throws IOException {
+	public void downloadFile(@PathVariable(value = "id") long id , Model model, HttpServletResponse response) throws IOException {
 		System.out.println("file id:"+id);
 		Optional<FileDB> temp = Optional.ofNullable(fileDBService.getFileDBById(id));
 		if(temp!=null) {
@@ -311,7 +343,34 @@ public class SubmissionController {
 			outputStream.close();
 		}
 	 }
-	// final submision
+	
+	//==========================================Re-Submission================================================//
+	@GetMapping("/resubmitManuscript/{id}")
+	public String resubmitManuscript(@PathVariable(value = "id") long id, Model model) {
+		SubmissionInfor manuscript = submissionInforService.getSubmissionInforById(id);
+		model.addAttribute("manuscript", manuscript);
+		return "resubmitForm";
+	}
+	@PostMapping("/saveResubmit")
+	public String saveResubmitManuscript(@RequestParam("file") MultipartFile file, 
+			@ModelAttribute("manuscript") SubmissionInfor submissionInfor) throws IOException {
+		System.out.println("id: "+submissionInfor.getsId());
+		
+		FileDB fileDB = fileDBService.getFileDBBySid(submissionInfor.getsId());
+		String fileName = file.getOriginalFilename();
+		fileDB.setFileName(fileName);
+		fileDB.setContent(file.getBytes());
+		fileDB.setSize(file.getSize());
+		fileDB.setType("manuscript");
+		fileDBService.saveFileDB(fileDB);
+
+		submissionInfor.setsState("re-submit");
+		submissionInforService.saveSubmissionInfor(submissionInfor);
+		reviewService.deleteManuscriptReviewBySid(submissionInfor.getsId());
+		return "redirect:/userInfo";
+	}
+	
+	//==========================================Final Submission============================================//
 	@GetMapping("/finalSubmission")
 	public String getfinalSubmission(Model model) {
 		return "finalSubmission";
@@ -319,7 +378,7 @@ public class SubmissionController {
 	//save final submission to database 
 	@PostMapping("/saveFinalSubmission")
 	public String savefinalSubmission(HttpServletRequest request,
-			@RequestParam("file") MultipartFile file, Principal principal ) throws IOException {
+			@RequestParam("file") MultipartFile file, Principal principal) throws IOException {
 		String aid= request.getParameter("aid");
 		String sid= request.getParameter("sid");
 		List<AppUser> listappUser = appUserService.getAllAppUser();
@@ -351,6 +410,7 @@ public class SubmissionController {
 		return "redirect:/userInfo";
 	}
 	
+	//=======================================Sending Manuscript For Reviewers==============================//
 	//send manuscript for reviewer
 	private long rid=0;
 	private long mid=0;

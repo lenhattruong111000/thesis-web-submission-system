@@ -63,4 +63,10 @@ public class ManuscriptReviewServiceImpl implements ManuscriptReviewService {
 		return manuscriptReviewRepository.getManuscriptReviewByRIDAndSID(r_id, s_id);
 	}
 
+	@Override
+	public void deleteManuscriptReviewBySid(long sid) {
+		this.manuscriptReviewRepository.deleteBySid(sid);
+		
+	}
+
 }

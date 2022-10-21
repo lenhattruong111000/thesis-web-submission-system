@@ -171,7 +171,61 @@
 </div>
 
 <hr>
-<!-- accepted List manuscript -->
+
+<!-- re-submit List manuscript -->
+
+<div>
+	<div align="left">
+		<table>
+			<tr>
+				<th><h2 align="left">Manuscripts are re-submitted</h2>
+			</tr>
+		</table>
+	</div>
+
+<table border="1" class="table table-striped table-hover table-responsive-md">
+	
+	<thead>
+		<tr align="center">
+			<th>s_id
+			<th>s_Authorid
+			<th>s_Title
+			<th>s_Authorname
+			<th>s_Major
+			<th>s_Workplace
+			<th>s_Abstract
+			<th>s_State
+		</tr>
+	</thead>
+	<tbody align="center">
+		<tr th:each=" manuscript : ${resubmitListManuscripts}" >
+			<td th:text="${manuscript.sId}"></td>
+			<td th:text="${manuscript.appUser.userId}"></td>
+			<td th:text="${manuscript.sTitle}"></td>
+			<td th:text="${manuscript.sAuthorname}"></td>
+			<td th:text="${manuscript.sMajor}"></td>
+			<td th:text="${manuscript.sWorkplace}"></td>
+			<td th:text="${manuscript.sAbstract}"></td>
+			<td th:text="${manuscript.sState}"></td>
+			
+			
+			<td>	
+				<div >
+					<table>
+						<tr>
+							<th><a th:href="@{/updateStateSubmission/{id}(id=${manuscript.sId})}"> <button type="button" class="btn btn-outline-primary">Update</button></a> 
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</tbody>
+	</table>
+</div>
+
+
+<hr>
+<!-- rejected List manuscript -->
 
 <div>
 	<div align="left">

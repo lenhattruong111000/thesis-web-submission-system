@@ -28,4 +28,6 @@ public interface ManuscriptReviewService {
     public void updateDateAndTimeReview(Date rdate, Time rtime, boolean isLate, long r_id, long s_id );
     
     public ManuscriptReview getManuscriptReviewBySidAndRid(long r_id, long s_id);
+    
+    public void deleteManuscriptReviewBySid(long sid);
 }

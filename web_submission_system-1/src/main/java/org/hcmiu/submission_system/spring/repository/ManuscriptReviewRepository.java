@@ -39,4 +39,8 @@ public interface ManuscriptReviewRepository extends JpaRepository<org.hcmiu.subm
 	@Query(value = "update manuscript_review set review_date= :rdate , review_time= :rtime , is_late= :isLate where reviewer_id= :r_id and s_id = :s_id", nativeQuery = true)
 	public void updateDateAndTimeReview(@Param("rdate") Date rdate, @Param("rtime") Time rtime, @Param("isLate") boolean isLate ,@Param("r_id") long r_id, @Param("s_id") long s_id);
 	
+	//delete by sId
+	@Modifying
+	@Query(value = "delete from submissionsystem.manuscript_review m where m.s_id= :sid", nativeQuery = true)
+	public void deleteBySid(@Param("sid") long sid);
 }

@@ -29,6 +29,7 @@ public interface SubmissionInforService {
     //get ManuscriptReview by reviewer Username
     public List<SubmissionInfor> getWaitingManuscriptReviewListByReviewerUsername(String username);
     
+    //extend the default allowedPacket in MySQL database
     public void setMaxAllowedPacket();
 	
 }

@@ -46,4 +46,10 @@ public class FileDBServiceImpl implements FileDBService {
 		
 	}
 
+	@Override
+	public FileDB getFileDBBySid(long id) {
+		
+		return fileDBRepository.getFileBySid(id);
+	}
+
 }
