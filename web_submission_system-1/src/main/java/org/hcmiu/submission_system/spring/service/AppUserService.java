@@ -34,4 +34,8 @@ public interface AppUserService {
     public void emailForNotifyReviewer(AppUser appUser) throws MessagingException, UnsupportedEncodingException;
     
     public void emailForNotifyAuthorAboutSubmissionState(AppUser appUser, SubmissionInfor submissionInfor) throws MessagingException, UnsupportedEncodingException;
+    
+    public void emailLoginVerify(AppUser appUser) throws MessagingException, UnsupportedEncodingException;
+    
+    public String getUserRolebyUserName(String username);
 }

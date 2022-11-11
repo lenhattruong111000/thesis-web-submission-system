@@ -200,4 +200,43 @@ public class AppUserServiceImpl implements AppUserService{
 		
 	}
 
+	@Override
+	public void emailLoginVerify(AppUser appUser) throws MessagingException, UnsupportedEncodingException {
+		// set ramdon verify code for login 
+		String randomCode = RandomString.make(6);
+		appUser.setVerificationCode(randomCode);
+		
+		// store verify code for login to the database
+		appUserRepository.setLoginVerifyCode(randomCode, appUser.getUserId());
+		
+		//sent verify code with email
+		String toAddress = appUser.getUserEmail();
+	    String fromAddress = fromEmailAddress();
+	    String senderName = "Submission_System";
+	    String subject = "Verify_Login";
+	    String content = "Dear "+appUser.getFullName()+",<br>"
+	            + "This is your verify code for login to the system:<br>"
+	    		+ "Code: "+ appUser.getVerificationCode() + "<br>"
+	            + "Best regards,<br>"
+	            + "Submission_System.";
+	     
+	    MimeMessage message = javaMailSender.createMimeMessage();
+	    MimeMessageHelper helper = new MimeMessageHelper(message);
+	     
+	    helper.setFrom(fromAddress, senderName);
+	    helper.setTo(toAddress);
+	    helper.setSubject(subject);
+	     
+	    helper.setText(content, true);
+	     
+	    javaMailSender.send(message);
+		
+	}
+
+	@Override
+	public String getUserRolebyUserName(String username) {
+		
+		return appUserRepository.getUserRolebyUserName(username);
+	}
+
 }

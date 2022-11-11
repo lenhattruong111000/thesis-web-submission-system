@@ -24,13 +24,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private DataSource dataSource;
 	
+	@Autowired 
+	private AppConfig appConfig;
+	
 
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 
 		// set up service for looking user in database.
 		// setup PasswordEncoder.
-		AppConfig appConfig =new AppConfig();
+		appConfig =new AppConfig();
 		auth.userDetailsService(userDetailsService).passwordEncoder(appConfig.passwordEncoder());
 
 	}
@@ -42,9 +45,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		// pages with login require
 		http.authorizeRequests().antMatchers("/", "/login", "/logout").permitAll();
-
-		//user role author and editor can access
-		http.authorizeRequests().antMatchers("/userInfo").access("hasAnyRole('ROLE_AUTHOR', 'ROLE_EDITOR')");
+		
+		//
+		http.authorizeRequests().antMatchers("/verifyLogin").access("hasAnyRole('ROLE_AUTHOR', 'ROLE_EDITOR', 'ROLE_REVIEWER')");
+		
+		//only user role author can access
+		http.authorizeRequests().antMatchers("/userInfo").access("hasAnyRole('ROLE_AUTHOR')");
 
 		// only editor can access this page
 		http.authorizeRequests().antMatchers("/editor").access("hasRole('ROLE_EDITOR')");
@@ -52,7 +58,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		//only reviewer can access this page
 		http.authorizeRequests().antMatchers("/reviewer").access("hasRole('ROLE_REVIEWER')");
 
-		//throw expection if login with wrong role
+		//throw exception if login with wrong role
 		http.authorizeRequests().and().exceptionHandling().accessDeniedPage("/403");
 
 		// set up for login form.
@@ -60,7 +66,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				// Submit URL for login page
 				.loginProcessingUrl("/j_spring_security_check") // Submit URL
 				.loginPage("/login")//
-				.defaultSuccessUrl("/userAccountInfo")//
+				.successForwardUrl("/verifyLogin")
+				.defaultSuccessUrl("/verifyLogin",true)//
 				.failureUrl("/login?error=true")//
 				.usernameParameter("username")//
 				.passwordParameter("password")

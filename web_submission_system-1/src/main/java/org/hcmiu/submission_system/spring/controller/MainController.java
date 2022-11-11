@@ -42,8 +42,8 @@ public class MainController {
 	@Autowired
 	private SubmissionInforService submissionInforService;
 	
-	@Autowired
-	private ManuscriptReviewService manuscriptReviewService;
+	//@Autowired
+	//private ManuscriptReviewService manuscriptReviewService;
 	
 	@RequestMapping(value = { "/", "/welcome" }, method = RequestMethod.GET)
 	public String welcomePage(Model model) {
@@ -140,10 +140,25 @@ public class MainController {
 
 		return "loginPage";
 	}
+	
+	@RequestMapping(value = "/verifyLogin", method = RequestMethod.GET)
+	public String verifyLoginPage(Model model, Principal principal) throws UnsupportedEncodingException, MessagingException {
+		
+		//get user by user name
+		AppUser getAppUser = appUserService.getUserByUserName(principal.getName());
+		if(getAppUser.isEnabled()==true) {
+			//send email with verify code for login
+			appUserService.emailLoginVerify(getAppUser);
+			return "verifyLogin";
+		}else {
+			return "verify_first";
+		}
+		
+	}
 
 	//========================================Author Page====================================================//
 	@RequestMapping(value = "/userInfo", method = RequestMethod.GET)
-	public String userInfo(Model model, Principal principal) {
+	public String userInfo(Model model, Principal principal) throws UnsupportedEncodingException, MessagingException {
 
 		//get username
 		String userName = principal.getName();
@@ -151,60 +166,95 @@ public class MainController {
 		System.out.println("User Name: " + userName);
 
 		User loginedUser = (User) ((Authentication) principal).getPrincipal();
+		
+		//get user by user name
+		AppUser getAppUser = appUserService.getUserByUserName(principal.getName());
+		
+		if(getAppUser.isEnabled()==true) {
+			
+			
+			String userInfo = WebUtils.toString(loginedUser);
+			model.addAttribute("userInfo", userInfo);
+			
+			// all submission information
+			List<SubmissionInfor>  allList= submissionInforService.getAllSubmissionInfor();
+			List<AppUser> listappUser = appUserService.getAllAppUser();
+			AppUser appUser=null;
+			for(int i=0; i<listappUser.size();i++) {
+				if(listappUser.get(i).getUserName().equals(userName)) {
+					appUser=appUserService.getAppUserById(listappUser.get(i).getUserId());
+					break;
+				}
+			}
+			
+			System.out.println("id by getuserbyuserid"+ appUser.getUserId());
+			
+			//view all submission are waiting
+			ArrayList<SubmissionInfor> waitingList = new ArrayList<SubmissionInfor>();
+			for(int i=0; i<allList.size();i++) {
+				if(allList.get(i).getsState().equals("waiting") &&
+						allList.get(i).getAppUser().getUserId().equals(appUser.getUserId())) {
+					waitingList.add(allList.get(i));
+				}
+			}
+			
+			model.addAttribute("waitingListManuscripts", waitingList);
+			
+			// view accepted list
+			ArrayList<SubmissionInfor> accpetedList = new ArrayList<SubmissionInfor>();
+			for(int i=0; i<allList.size();i++) {
+				if(allList.get(i).getsState().equals("accept_with_small_changeable") || 
+						allList.get(i).getsState().equals("accept_with_changeable") &&
+						allList.get(i).getAppUser().getUserId().equals(appUser.getUserId())) {
+					
+					accpetedList.add(allList.get(i));
+				}
+			}
+			
+			model.addAttribute("acceptedListManuscripts", accpetedList);
+			
+			//view rejected list
+			ArrayList<SubmissionInfor> rejectedList = new ArrayList<SubmissionInfor>();
+			for(int i=0; i<allList.size();i++) {
+				if(allList.get(i).getsState().equals("reject") &&
+						allList.get(i).getAppUser().getUserId().equals(appUser.getUserId())) {
+					rejectedList.add(allList.get(i));
+				}
+			}
+			
+			model.addAttribute("rejectedListManuscripts", rejectedList);
+			
+			return "userInfoPage";
+			
+			
+		}else {
+			return "verify_first";
+		}
 
-		String userInfo = WebUtils.toString(loginedUser);
-		model.addAttribute("userInfo", userInfo);
-		
-		// all submission information
-		List<SubmissionInfor>  allList= submissionInforService.getAllSubmissionInfor();
-		List<AppUser> listappUser = appUserService.getAllAppUser();
-		AppUser appUser=null;
-		for(int i=0; i<listappUser.size();i++) {
-			if(listappUser.get(i).getUserName().equals(userName)) {
-				appUser=appUserService.getAppUserById(listappUser.get(i).getUserId());
-				break;
-			}
-		}
-		
-		System.out.println("id by getuserbyuserid"+ appUser.getUserId());
-		
-		//view all submission are waiting
-		ArrayList<SubmissionInfor> waitingList = new ArrayList<SubmissionInfor>();
-		for(int i=0; i<allList.size();i++) {
-			if(allList.get(i).getsState().equals("waiting") &&
-					allList.get(i).getAppUser().getUserId().equals(appUser.getUserId())) {
-				waitingList.add(allList.get(i));
-			}
-		}
-		
-		model.addAttribute("waitingListManuscripts", waitingList);
-		
-		// view accepted list
-		ArrayList<SubmissionInfor> accpetedList = new ArrayList<SubmissionInfor>();
-		for(int i=0; i<allList.size();i++) {
-			if(allList.get(i).getsState().equals("accept_with_small_changeable") || 
-					allList.get(i).getsState().equals("accept_with_changeable") &&
-					allList.get(i).getAppUser().getUserId().equals(appUser.getUserId())) {
-				accpetedList.add(allList.get(i));
-			}
-		}
-		
-		model.addAttribute("acceptedListManuscripts", accpetedList);
-		
-		//view rejected list
-		ArrayList<SubmissionInfor> rejectedList = new ArrayList<SubmissionInfor>();
-		for(int i=0; i<allList.size();i++) {
-			if(allList.get(i).getsState().equals("reject") &&
-					allList.get(i).getAppUser().getUserId().equals(appUser.getUserId())) {
-				rejectedList.add(allList.get(i));
-			}
-		}
-		
-		model.addAttribute("rejectedListManuscripts", rejectedList);
-		
-		return "userInfoPage";
+
 	}
-
+	
+	@PostMapping("/verifyLoginCode")
+	public String enterUserPage(HttpServletRequest request, Principal principal, Model model) {
+		String verifyCode = request.getParameter("verifyLoginCode");
+		AppUser user = appUserService.getUserByUserName(principal.getName());
+		if(verifyCode.equals(user.getVerificationCode())) {
+			if(appUserService.getUserRolebyUserName(principal.getName()).equals("ROLE_AUTHOR")) {
+				
+				return "redirect:/userInfo";
+			}else if(appUserService.getUserRolebyUserName(principal.getName()).equals("ROLE_EDITOR")) {
+				
+				return "redirect:/editor";
+			}else if(appUserService.getUserRolebyUserName(principal.getName()).equals("ROLE_REVIEWER")) {
+				
+				return "redirect:/reviewer";
+			}else return "verify_fail";
+			
+		}else return "verify_fail";
+	
+	}
+	
+	
 	@RequestMapping(value = "/403", method = RequestMethod.GET)
 	public String accessDenied(Model model, Principal principal) {
 

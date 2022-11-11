@@ -26,4 +26,14 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 	
 	@Query(value = "SELECT * FROM app_user u, user_role r where u.user_id=r.user_id and r.role_id=3;", nativeQuery = true)
 	public List<AppUser> getAllReviewer();
+	
+	@Modifying
+	@Query(value = "UPDATE `submissionsystem`.`app_user` SET `Verification_Code` = :code WHERE (`USER_ID` = :userId)", nativeQuery = true)
+	public void setLoginVerifyCode(@Param("code") String code, @Param("userId") long userId );
+	
+	//get user role by user name
+	@Query(value = "select app_role.ROLE_NAME from app_role , app_user, user_role where \r\n"
+			+ "app_user.USER_ID = user_role.USER_ID and \r\n"
+			+ "app_role.ROLE_ID=user_role.ROLE_ID and app_user.USER_NAME= :username", nativeQuery = true)
+	public String getUserRolebyUserName(@Param("username") String username);
 }

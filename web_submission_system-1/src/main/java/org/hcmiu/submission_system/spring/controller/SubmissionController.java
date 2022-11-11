@@ -116,10 +116,14 @@ public class SubmissionController {
 		fileDB.setFileName(fileName);
 		fileDB.setContent(file.getBytes());
 		fileDB.setSize(file.getSize());
-		fileDB.setType("manuscript");
+		fileDB.setType("manuscript"); 
 		fileDBService.saveFileDB(fileDB);
 		
+		//create new co-author
+		CoAuthor coauthor= new CoAuthor();
+		//set state for new submission
 		submissionInfor.setsState("waiting");
+		submissionInfor.setFileDB(fileDB);
 		submissionInforService.saveSubmissionInfor(submissionInfor);
 		//set Name and id for author
 		List<AppUser> listUser = appUserService.getAllAppUser();
@@ -127,11 +131,21 @@ public class SubmissionController {
 			if(listUser.get(i).getUserName().equals(principal.getName())) {
 				//submissionInfor.setAppUser(listUser.get(i));
 				submissionInforService.setNameAndIdForAuthor(listUser.get(i).getUserId(), listUser.get(i).getFullName(), submissionInfor.getsId());
-				break;
+				 
+				//set information for new co-author
+				coauthor.setSubmissionInfor(submissionInfor);
+				coauthor.setCoFullname(listUser.get(i).getFullName());
+				coauthor.setCoEmail(listUser.get(i).getUserEmail());
+				coauthor.setCoOrganization(submissionInfor.getsWorkplace());
+				coauthor.setCoCountry(submissionInfor.getsCountry());
+				coauthor.setCoWebpage("");
+				coauthor.setCoCorrespondingauthor(true);
 			}
 		}
 		
-		fileDBService.setSubmissionInfoId(submissionInfor.getsId(), fileDB.getId());
+		//fileDBService.setSubmissionInfoId(submissionInfor.getsId(), fileDB.getId());
+		//save new co-author
+		coAuthorService.saveCoAuthor(coauthor);
 		
 		return "redirect:/userInfo";
 	}
@@ -328,10 +342,12 @@ public class SubmissionController {
 		return "redirect:/editor";
 	}
 	
+	//====================================Download Manuscript File====================================================//
 	@GetMapping("/downloadfile/{id}")
 	public void downloadFile(@PathVariable(value = "id") long id , Model model, HttpServletResponse response) throws IOException {
 		System.out.println("file id:"+id);
-		Optional<FileDB> temp = Optional.ofNullable(fileDBService.getFileDBById(id));
+		SubmissionInfor infor = submissionInforService.getSubmissionInforById(id);
+		Optional<FileDB> temp = Optional.ofNullable(fileDBService.getFileDBById(infor.getFileDB().getId()));
 		if(temp!=null) {
 			FileDB fileDB = temp.get();
 			response.setContentType("application/octet-stream");
@@ -356,16 +372,18 @@ public class SubmissionController {
 			@ModelAttribute("manuscript") SubmissionInfor submissionInfor) throws IOException {
 		System.out.println("id: "+submissionInfor.getsId());
 		
-		FileDB fileDB = fileDBService.getFileDBBySid(submissionInfor.getsId());
+		// get file submission by file id
+		FileDB fileDB = fileDBService.getFileDBById(submissionInfor.getFileDB().getId());
 		String fileName = file.getOriginalFilename();
 		fileDB.setFileName(fileName);
 		fileDB.setContent(file.getBytes());
 		fileDB.setSize(file.getSize());
 		fileDB.setType("manuscript");
 		fileDBService.saveFileDB(fileDB);
-
+		
 		submissionInfor.setsState("re-submit");
 		submissionInforService.saveSubmissionInfor(submissionInfor);
+		submissionInforService.updateFileId(fileDB.getId(), submissionInfor.getsId());
 		reviewService.deleteManuscriptReviewBySid(submissionInfor.getsId());
 		return "redirect:/userInfo";
 	}
@@ -395,8 +413,8 @@ public class SubmissionController {
 		for(int i=0; i<submissionInfors.size();i++) {
 			if(submissionInfors.get(i).getAppUser().getUserId().equals(appUser.getUserId()) &&
 					submissionInfors.get(i).getsId().equals(Long.valueOf(sid))&&
-					submissionInfors.get(i).getsState().equals("accept")) {
-				FileDB fileDB = fileDBService.getFileDBById(Long.valueOf(sid));
+					submissionInfors.get(i).getsState().equals("accept_without_changeable")) {
+				FileDB fileDB = fileDBService.getFileDBById(Long.valueOf(submissionInfors.get(i).getFileDB().getId()));
 				
 				fileDB.setType("manuscript/finalSubmit");
 				fileDB.setSfileName(file.getOriginalFilename());
@@ -415,7 +433,7 @@ public class SubmissionController {
 	private long rid=0;
 	private long mid=0;
 	@GetMapping("/send/{rid}/{mid}")
-	public String sentManuscriptForReviewer(@PathVariable(value = "rid") long rid, @PathVariable(value = "mid") long mid, Model model) {
+	public String sentManuscriptForReviewerPage(@PathVariable(value = "rid") long rid, @PathVariable(value = "mid") long mid, Model model) {
 		System.out.println("rid="+ rid);
 		System.out.println("mid"+mid);
 		this.rid=rid;
@@ -461,7 +479,7 @@ public class SubmissionController {
 	
 	//Evaluate the manuscript of reviewer
 	@GetMapping("/reviewManuscript/{id}")
-	public String ReviewManuscript(@PathVariable(value = "id") long id,Model model, Principal principal) {
+	public String ReviewManuscriptPage(@PathVariable(value = "id") long id,Model model, Principal principal) {
 		
 		//get Manuscript Information
 		SubmissionInfor submissionInfor = submissionInforService.getSubmissionInforById(id);

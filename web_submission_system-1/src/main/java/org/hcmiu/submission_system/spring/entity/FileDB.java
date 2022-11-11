@@ -30,9 +30,9 @@ public class FileDB {
 	@Lob
 	private byte [] content;
 	 
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name ="sId", nullable = true)
-	private SubmissionInfor submissionInfor;
+//	@OneToOne(cascade = CascadeType.ALL)
+//	@JoinColumn(name ="sId", nullable = true)
+//	private SubmissionInfor submissionInfor;
 	 
 	@Column( name ="sfileName", length = 255, nullable = true)
 	private String sfileName;
@@ -73,12 +73,12 @@ public class FileDB {
 	public void setContent(byte[] content) {
 		this.content = content;
 	}
-	public SubmissionInfor getSubmissionInfor() {
-		return submissionInfor;
-	}
-	public void setSubmissionInfor(SubmissionInfor submissionInfor) {
-		this.submissionInfor = submissionInfor;
-	}
+//	public SubmissionInfor getSubmissionInfor() {
+//		return submissionInfor;
+//	}
+//	public void setSubmissionInfor(SubmissionInfor submissionInfor) {
+//		this.submissionInfor = submissionInfor;
+//	}
 	public String getSfileName() {
 		return sfileName;
 	}

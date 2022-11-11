@@ -1,5 +1,6 @@
 package org.hcmiu.submission_system.spring.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -8,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -47,6 +49,10 @@ public class SubmissionInfor {
 	
 	@Column(name ="sState", length = 30 ,nullable =true)
 	private String sState;
+	
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="fid", nullable = true)
+	private FileDB fileDB;
 
 	public Long getsId() {
 		return sId;
@@ -134,6 +140,14 @@ public class SubmissionInfor {
 
 	public void setsComment(String sComment) {
 		this.sComment = sComment;
+	}
+
+	public FileDB getFileDB() {
+		return fileDB;
+	}
+
+	public void setFileDB(FileDB fileDB) {
+		this.fileDB = fileDB;
 	}
 	
 	

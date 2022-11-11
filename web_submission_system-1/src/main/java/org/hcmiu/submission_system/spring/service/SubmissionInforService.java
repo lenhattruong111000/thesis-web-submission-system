@@ -23,6 +23,8 @@ public interface SubmissionInforService {
     
     public void updateMauscriptComment(String comment, long sid);
     
+    public void updateFileId(long fid, long sid);
+    
     //get ManuscriptReview by reviewer Id
     public List<SubmissionInfor> getManuscriptReviewListByReviewerId(long id);
     

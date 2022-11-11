@@ -14,5 +14,4 @@ public interface FileDBService {
 	
 	public void setSubmissionInfoId(long sid, long id);
 	
-	public FileDB getFileDBBySid(long id);
 }

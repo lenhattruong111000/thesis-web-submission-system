@@ -25,6 +25,9 @@ public interface SubmissionInforReposity extends JpaRepository<SubmissionInfor, 
 	@Query(value ="UPDATE `submissionsystem`.`submission_infor` SET `s_comment` =?1 WHERE (`s_id` =?2);", nativeQuery = true )
 	public void updateComment(String comment, long sid);
 	
+	@Modifying
+	@Query(value ="UPDATE `submissionsystem`.`submission_infor` SET `fid` = :fid WHERE (`s_id` = :sid )", nativeQuery = true )
+	public void updateFileId(@Param("fid") long fid, @Param("sid") long sid);
 	
 	@Query(value = "select * from submission_infor s where s.s_id= (select s_id from manuscript_review m where s.s_id= m.s_id and m.reviewer_id= ?1);", nativeQuery = true)
 	public List<SubmissionInfor> getManuscriptReviewListByReviewerId(long id);
@@ -34,6 +37,8 @@ public interface SubmissionInforReposity extends JpaRepository<SubmissionInfor, 
 	public List<SubmissionInfor> getWaitingManuscriptReviewListByReviewerUsername(@Param("username") String username);
 	
 	@Modifying
-	@Query(value = "SET GLOBAL max_allowed_packet=134740992;", nativeQuery = true)
+	@Query(value = "SET GLOBAL max_allowed_packet=1073741824;", nativeQuery = true)
 	public void setMaxAllowedPacket();
+	
+	
 }

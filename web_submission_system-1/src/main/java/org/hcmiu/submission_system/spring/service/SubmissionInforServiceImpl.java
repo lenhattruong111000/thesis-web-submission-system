@@ -76,4 +76,10 @@ public class SubmissionInforServiceImpl implements SubmissionInforService {
 		
 	}
 
+	@Override
+	public void updateFileId(long fid, long sid) {
+		this.submissionInforReposity.updateFileId(fid, sid);
+		
+	}
+
 }

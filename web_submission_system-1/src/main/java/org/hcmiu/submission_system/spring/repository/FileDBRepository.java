@@ -15,6 +15,6 @@ public interface FileDBRepository extends JpaRepository<FileDB, Long>{
 	@Query(value = "UPDATE `submissionsystem`.`files` SET `s_id` =?1 WHERE (`id` =?2);", nativeQuery = true)
 	public void setSubmissionInfoId(long sid, long id);
 	
-	@Query(value = "select * From submissionsystem.files f where f.s_id= :sid", nativeQuery = true)
-	public FileDB getFileBySid(@Param("sid") long id);
+	@Query(value = "select * From submissionsystem.files f where f.id= :id", nativeQuery = true)
+	public FileDB getFileById(@Param("id") long id);
 }
