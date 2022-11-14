@@ -45,6 +45,10 @@
         <li>
         	<a class="nav-link" href="/registerForm">Register</a>
         </li>
+        
+        <li>
+          <a class="nav-link" aria-current="page" th:if="${#request.userPrincipal != null}" th:href="@{/logout}">Logout</a>
+        </li>
     
       </ul>
       <form class="d-flex">

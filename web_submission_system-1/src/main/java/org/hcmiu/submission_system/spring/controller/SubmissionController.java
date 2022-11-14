@@ -88,10 +88,17 @@ public class SubmissionController {
 	//======================================Submission Manuscript==================================//
 	@GetMapping("/submissionForm")
 	public String getSubmissionForm(Model model, Principal principal) {
+		
 		submissionInforService.setMaxAllowedPacket();
 		System.out.println(principal.getName());
 		AppUser appUser = appUserService.getUserByUserName(principal.getName());
 		System.out.println(appUser.isEnabled());
+		
+			///////
+			if(appUser.isEnabled()==true && appUser.getVerificationCode()!=null) {
+				return "verifyLogin";
+			}
+			//////
 		
 		if(appUser.isEnabled()==true) {
 			SubmissionInfor submissionInfor =new SubmissionInfor();
@@ -153,7 +160,15 @@ public class SubmissionController {
 	//add co-author
 	private long sid=0;
 	@GetMapping("/newCoAuthorForm/{id}")
-	public String addNewCoauthor(@PathVariable(value = "id") long id, Model model){
+	public String addNewCoauthor(@PathVariable(value = "id") long id, Model model, Principal principal){
+		
+			///////
+			AppUser getAppUser = appUserService.getUserByUserName(principal.getName());
+			if(getAppUser.isEnabled()==true && getAppUser.getVerificationCode()!=null) {
+				return "verifyLogin";
+			}
+			//////
+		
 		//display co-author that already existed 
 		sid=id;
 		List<CoAuthor> allCoAuthorList =coAuthorService.getAllCoAuthor();
@@ -204,7 +219,15 @@ public class SubmissionController {
 	//update state
 	//private long sidForUpdate;
 	@GetMapping("/updateStateSubmission/{id}")
-	public String getUpdateStateSubmission(@PathVariable(value = "id") long id,Model model) {
+	public String getUpdateStateSubmission(@PathVariable(value = "id") long id,Model model, Principal principal) {
+		
+		///////
+		AppUser getAppUser = appUserService.getUserByUserName(principal.getName());
+		if(getAppUser.isEnabled()==true && getAppUser.getVerificationCode()!=null) {
+			return "verifyLogin";
+		}
+		//////
+		
 		//sidForUpdate=id;
 		//get all reviewer 
 		List<AppUser> reviewerList= appUserService.getAllReviewer();
@@ -345,6 +368,7 @@ public class SubmissionController {
 	//====================================Download Manuscript File====================================================//
 	@GetMapping("/downloadfile/{id}")
 	public void downloadFile(@PathVariable(value = "id") long id , Model model, HttpServletResponse response) throws IOException {
+		
 		System.out.println("file id:"+id);
 		SubmissionInfor infor = submissionInforService.getSubmissionInforById(id);
 		Optional<FileDB> temp = Optional.ofNullable(fileDBService.getFileDBById(infor.getFileDB().getId()));
@@ -362,16 +386,26 @@ public class SubmissionController {
 	
 	//==========================================Re-Submission================================================//
 	@GetMapping("/resubmitManuscript/{id}")
-	public String resubmitManuscript(@PathVariable(value = "id") long id, Model model) {
+	public String resubmitManuscript(@PathVariable(value = "id") long id, Model model, Principal principal) {
+		
+		///////
+		AppUser getAppUser = appUserService.getUserByUserName(principal.getName());
+		if(getAppUser.isEnabled()==true && getAppUser.getVerificationCode()!=null) {
+			return "verifyLogin";
+		}
+		//////
 		SubmissionInfor manuscript = submissionInforService.getSubmissionInforById(id);
 		model.addAttribute("manuscript", manuscript);
 		return "resubmitForm";
 	}
 	@PostMapping("/saveResubmit")
 	public String saveResubmitManuscript(@RequestParam("file") MultipartFile file, 
-			@ModelAttribute("manuscript") SubmissionInfor submissionInfor) throws IOException {
+			@ModelAttribute("manuscript") SubmissionInfor manuscript) throws IOException {
+		SubmissionInfor submissionInfor =submissionInforService.getSubmissionInforById(manuscript.getsId());
 		System.out.println("id: "+submissionInfor.getsId());
 		
+		System.out.println("name:"+submissionInfor.getsTitle());
+		System.out.println("file Id: "+ submissionInfor.getFileDB().getId());
 		// get file submission by file id
 		FileDB fileDB = fileDBService.getFileDBById(submissionInfor.getFileDB().getId());
 		String fileName = file.getOriginalFilename();
@@ -390,7 +424,13 @@ public class SubmissionController {
 	
 	//==========================================Final Submission============================================//
 	@GetMapping("/finalSubmission")
-	public String getfinalSubmission(Model model) {
+	public String getfinalSubmission(Model model, Principal principal) {
+		///////
+		AppUser getAppUser = appUserService.getUserByUserName(principal.getName());
+		if(getAppUser.isEnabled()==true && getAppUser.getVerificationCode()!=null) {
+			return "verifyLogin";
+		}
+		//////
 		return "finalSubmission";
 	}
 	//save final submission to database 
@@ -433,7 +473,15 @@ public class SubmissionController {
 	private long rid=0;
 	private long mid=0;
 	@GetMapping("/send/{rid}/{mid}")
-	public String sentManuscriptForReviewerPage(@PathVariable(value = "rid") long rid, @PathVariable(value = "mid") long mid, Model model) {
+	public String sentManuscriptForReviewerPage(@PathVariable(value = "rid") long rid, @PathVariable(value = "mid") long mid, Model model, Principal principal) {
+		
+		///////
+		AppUser getAppUser = appUserService.getUserByUserName(principal.getName());
+		if(getAppUser.isEnabled()==true && getAppUser.getVerificationCode()!=null) {
+			return "verifyLogin";
+		}
+		//////
+		
 		System.out.println("rid="+ rid);
 		System.out.println("mid"+mid);
 		this.rid=rid;
@@ -480,6 +528,13 @@ public class SubmissionController {
 	//Evaluate the manuscript of reviewer
 	@GetMapping("/reviewManuscript/{id}")
 	public String ReviewManuscriptPage(@PathVariable(value = "id") long id,Model model, Principal principal) {
+		
+		///////
+		AppUser getAppUser = appUserService.getUserByUserName(principal.getName());
+		if(getAppUser.isEnabled()==true && getAppUser.getVerificationCode()!=null) {
+			return "verifyLogin";
+		}
+		//////
 		
 		//get Manuscript Information
 		SubmissionInfor submissionInfor = submissionInforService.getSubmissionInforById(id);

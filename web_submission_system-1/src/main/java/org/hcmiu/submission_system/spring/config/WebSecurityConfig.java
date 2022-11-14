@@ -50,13 +50,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().antMatchers("/verifyLogin").access("hasAnyRole('ROLE_AUTHOR', 'ROLE_EDITOR', 'ROLE_REVIEWER')");
 		
 		//only user role author can access
-		http.authorizeRequests().antMatchers("/userInfo").access("hasAnyRole('ROLE_AUTHOR')");
+		http.authorizeRequests().antMatchers("/userInfo","/submissionForm", "/newCoAuthorForm/**", "/resubmitManuscript/**").access("hasAnyRole('ROLE_AUTHOR')");
 
 		// only editor can access this page
-		http.authorizeRequests().antMatchers("/editor").access("hasRole('ROLE_EDITOR')");
+		http.authorizeRequests().antMatchers("/editor","/updateStateSubmission/**", "/send/**").access("hasRole('ROLE_EDITOR')");
 		
 		//only reviewer can access this page
-		http.authorizeRequests().antMatchers("/reviewer").access("hasRole('ROLE_REVIEWER')");
+		http.authorizeRequests().antMatchers("/reviewer","/reviewManuscript/**").access("hasRole('ROLE_REVIEWER')");
 
 		//throw exception if login with wrong role
 		http.authorizeRequests().and().exceptionHandling().accessDeniedPage("/403");

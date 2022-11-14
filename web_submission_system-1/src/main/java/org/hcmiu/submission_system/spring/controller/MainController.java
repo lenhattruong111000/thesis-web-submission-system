@@ -71,6 +71,13 @@ public class MainController {
 		User loginedUser = (User) ((Authentication) principal).getPrincipal();
 
 		String userInfo = WebUtils.toString(loginedUser);
+		
+		///////
+		AppUser getAppUser = appUserService.getUserByUserName(principal.getName());
+		if(getAppUser.isEnabled()==true && getAppUser.getVerificationCode()!=null) {
+			return "verifyLogin";
+		}
+		//////
 		model.addAttribute("userInfo", userInfo);
 		
 
@@ -129,6 +136,13 @@ public class MainController {
 		User loginedUser = (User) ((Authentication) principal).getPrincipal();
 
 		String userInfo = WebUtils.toString(loginedUser);
+		
+		///////
+		AppUser getAppUser = appUserService.getUserByUserName(principal.getName());
+		if(getAppUser.isEnabled()==true && getAppUser.getVerificationCode()!=null) {
+			return "verifyLogin";
+		}
+		//////
 		model.addAttribute("userInfo", userInfo);
 		
 		model.addAttribute("waitingListManuscripts",submissionInforService.getWaitingManuscriptReviewListByReviewerUsername(principal.getName()));
@@ -169,7 +183,11 @@ public class MainController {
 		
 		//get user by user name
 		AppUser getAppUser = appUserService.getUserByUserName(principal.getName());
-		
+		/////////
+		if(getAppUser.isEnabled()==true && getAppUser.getVerificationCode()!=null) {
+			return "verifyLogin";
+		}
+		////////
 		if(getAppUser.isEnabled()==true) {
 			
 			
@@ -239,6 +257,11 @@ public class MainController {
 		String verifyCode = request.getParameter("verifyLoginCode");
 		AppUser user = appUserService.getUserByUserName(principal.getName());
 		if(verifyCode.equals(user.getVerificationCode())) {
+			
+			////
+			appUserService.setLoginVerifyCode(null, user.getUserId());
+			////
+			
 			if(appUserService.getUserRolebyUserName(principal.getName()).equals("ROLE_AUTHOR")) {
 				
 				return "redirect:/userInfo";
@@ -277,6 +300,7 @@ public class MainController {
 	//======================================Register Author Account Page======================================//
 	@GetMapping("/registerForm")
 	public String getAuthorRegisterForm(Model model) {
+	
 		AppUser appUser = new AppUser();
 		model.addAttribute("author",appUser);
 		return "registerForm";

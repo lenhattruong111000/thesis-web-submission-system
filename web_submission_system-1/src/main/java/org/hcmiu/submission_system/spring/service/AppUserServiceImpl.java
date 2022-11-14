@@ -239,4 +239,10 @@ public class AppUserServiceImpl implements AppUserService{
 		return appUserRepository.getUserRolebyUserName(username);
 	}
 
+	@Override
+	public void setLoginVerifyCode(String code, long userId) {
+		this.appUserRepository.setLoginVerifyCode(code, userId);
+		
+	}
+
 }

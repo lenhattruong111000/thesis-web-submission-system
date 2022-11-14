@@ -38,4 +38,9 @@ public interface AppUserService {
     public void emailLoginVerify(AppUser appUser) throws MessagingException, UnsupportedEncodingException;
     
     public String getUserRolebyUserName(String username);
+    
+    /////
+    public void setLoginVerifyCode(String code, long userId );
+    
+    ////
 }
