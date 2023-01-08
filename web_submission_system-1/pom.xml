@@ -65,6 +65,8 @@
 			<scope>test</scope>
 		</dependency>
 		
+	
+		
 		<dependency>
   			<groupId>com.copyleaks.sdk</groupId>
   			<artifactId>copyleaks-java-sdk</artifactId>

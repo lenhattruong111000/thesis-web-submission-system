@@ -9,9 +9,11 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hcmiu.submission_system.spring.entity.AppUser;
+import org.hcmiu.submission_system.spring.entity.Author;
 import org.hcmiu.submission_system.spring.entity.SubmissionInfor;
 import org.hcmiu.submission_system.spring.entity.UserRole;
 import org.hcmiu.submission_system.spring.service.AppUserService;
+import org.hcmiu.submission_system.spring.service.AuthorServiceImpl;
 import org.hcmiu.submission_system.spring.service.ManuscriptReviewService;
 import org.hcmiu.submission_system.spring.service.SubmissionInforService;
 import org.hcmiu.submission_system.spring.service.UserRoleService;
@@ -41,6 +43,9 @@ public class MainController {
 	
 	@Autowired
 	private SubmissionInforService submissionInforService;
+	
+	@Autowired
+	private AuthorServiceImpl authorServiceImpl;
 	
 	//@Autowired
 	//private ManuscriptReviewService manuscriptReviewService;
@@ -314,6 +319,10 @@ public class MainController {
 		//set role for author
 		System.out.println("author id: "+ appUser.getUserId());
 		userRoleServiceImpl.setAuthorRole(appUser.getUserId());
+		//add to author list
+		Author author = new Author();
+		author.setAppUser(appUser);
+		authorServiceImpl.addToAuthorList(author);
 		return "redirect:/register_success";
 	}
 	
