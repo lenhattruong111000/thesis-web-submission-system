@@ -52,10 +52,10 @@ public class ManuscriptReview {
 	@Column(name = "reviewerState", length = 30, nullable = true)
 	private String reviewerState;
 	
-	@Column(name = "reviewerComment", length = 255, nullable = true)
+	@Column(name = "reviewerComment", length = 65535, nullable = true)
 	private String reviewerComment;
 	
-	@Column(name = "editorComment", length = 255, nullable = true)
+	@Column(name = "editorComment", length = 65535, nullable = true)
 	private String editorComment;
 
 	public Long getId() {

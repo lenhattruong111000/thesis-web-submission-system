@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Sending Manuscript</title>
+<title> Multiple Sending Manuscript</title>
 </head>
 <body>
 <h1>Sending Manuscript</h1>
 
 <div>
-	<form action="/sendManuscript" method="post" th:object="${manuscriptReview}">
+	<form action="/multiSending" method="post">
 		<table>
 			<tr>
 				<th>Deadline</th>
@@ -20,7 +20,7 @@
 			
 			<tr>
 				<th>Comment:</th>
-				<th> <textarea rows="10" cols="50" name="editorComment" th:field="${manuscriptReview.editorComment}"></textarea> </th>
+				<th> <textarea rows="10" cols="50" name="editorComment" ></textarea> </th>
 			</tr>
 			
 			<tr>

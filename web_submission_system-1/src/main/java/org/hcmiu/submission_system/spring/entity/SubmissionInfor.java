@@ -23,7 +23,7 @@ public class SubmissionInfor {
 	@JoinColumn(name="sAuthorid", nullable = true)
 	private AppUser appUser;
 	
-	@Column(name ="sTitle", nullable =true, length = 100)
+	@Column(name ="sTitle", nullable =true, length = 65535)
 	private String sTitle;
 	
 	@Column(name ="sAuthorname", nullable =true, length =30 )
@@ -41,7 +41,7 @@ public class SubmissionInfor {
 	@Column(name = "sKeyword", length = 255, nullable = true)
 	private String sKeyword;
 	
-	@Column(name ="sAbstract", nullable =true, length = 255)
+	@Column(name ="sAbstract", nullable =true, length = 65535)
 	private String sAbstract;
 	
 	@Column(name = "sComment", length = 255, nullable = true)

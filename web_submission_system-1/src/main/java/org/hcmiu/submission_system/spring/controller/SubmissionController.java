@@ -415,7 +415,12 @@ public class SubmissionController {
 		fileDB.setType("manuscript");
 		fileDBService.saveFileDB(fileDB);
 		
-		submissionInfor.setsState("re-submit");
+		if(submissionInfor.getsState().equals("waiting")==false) {
+			submissionInfor.setsState("re-submit");
+		}else {
+			submissionInfor.setsState("waiting");
+		}
+		
 		submissionInforService.saveSubmissionInfor(submissionInfor);
 		submissionInforService.updateFileId(fileDB.getId(), submissionInfor.getsId());
 		reviewService.deleteManuscriptReviewBySid(submissionInfor.getsId());
@@ -469,7 +474,7 @@ public class SubmissionController {
 	}
 	
 	//=======================================Sending Manuscript For Reviewers==============================//
-	//send manuscript for reviewer
+	//send manuscript for reviewer(send one by one)
 	private long rid=0;
 	private long mid=0;
 	@GetMapping("/send/{rid}/{mid}")
@@ -611,5 +616,79 @@ public class SubmissionController {
 		reviewService.updateStateAndComment(manuscriptReview.getReviewerState(), manuscriptReview.getReviewerComment(), appUserService.getUserByUserName(principal.getName()).getUserId(), submissionInfor.getsId());
 		
 		return "redirect:/reviewer";
+	}
+	//send more than 1 reviewer at the same time
+	
+	@GetMapping("/multi_sending")
+	public String sendingPage() {
+		return "multi_sending";
+	}
+	private List<AppUser> reviewerList = new ArrayList<AppUser>();
+	private long midMutiSending=0;
+	@PostMapping("/getSendingList")
+	public String SendingAtTheSameTime(HttpServletRequest request) {
+		AppUser reviewer =null;
+		String[] review_id_list= request.getParameterValues("reviewerList");
+		midMutiSending= Long.valueOf(request.getParameter("manuscript_id_multi"));
+		for(int i=0; i<review_id_list.length;i++) {
+			reviewer= appUserService.getAppUserById(Long.valueOf(review_id_list[i]));
+			reviewerList.add(reviewer);
+		}
+		
+		System.out.println(review_id_list[0]);
+		System.out.println(review_id_list[1]);
+		
+		for(int i=0; i<reviewerList.size();i++) {
+			System.out.println(reviewerList.get(i).getUserEmail());
+		}
+		
+		return "/multi_sending";
+	}
+	
+	@PostMapping("/multiSending")
+	public String multiSending(HttpServletRequest request) throws UnsupportedEncodingException, MessagingException {
+		//get manuscript by id
+		SubmissionInfor submissionInfor= new SubmissionInfor();
+		submissionInfor = submissionInforService.getSubmissionInforById(midMutiSending);
+				
+		//get reviewer by id
+		AppUser reviewer = null;
+		ManuscriptReview manuscriptReview =null;
+		for(int i=0; i<reviewerList.size();i++) {
+			reviewer = appUserService.getAppUserById(reviewerList.get(i).getUserId());
+			manuscriptReview =new ManuscriptReview();
+			manuscriptReview.setSubmissionInfor(submissionInfor);
+			manuscriptReview.setAppUser(reviewer);
+			manuscriptReview.setReviewerState("waiting");
+			manuscriptReview.setsDeadlinedate(Date.valueOf(request.getParameter("deadlineDate")));
+			manuscriptReview.setsDeadlinetime(Time.valueOf(request.getParameter("deadlineTime")+":00"));
+			manuscriptReview.setEditorComment(request.getParameter("editorComment"));
+			reviewService.saveManuscriptReview(manuscriptReview);
+			//send mail for reviewer
+			appUserService.emailForNotifyReviewer(reviewer);
+		}
+		
+		
+				
+		System.out.println("deadline Date:"+request.getParameter("deadlineDate"));
+		System.out.println("deadline Time:"+request.getParameter("deadlineTime"));
+				
+//		manuscriptReview =new ManuscriptReview();		
+//		manuscriptReview.setSubmissionInfor(submissionInfor);
+//		manuscriptReview.setAppUser(appUser);
+//		manuscriptReview.setReviewerState("waiting");
+//		manuscriptReview.setsDeadlinedate(Date.valueOf(request.getParameter("deadlineDate")));
+//		manuscriptReview.setsDeadlinetime(Time.valueOf(request.getParameter("deadlineTime")+":00"));
+//				
+//		System.out.println("reviewerId: " +manuscriptReview.getAppUser().getUserId());
+//		System.out.println("reviewerName: " +manuscriptReview.getAppUser().getUserName());
+//		System.out.println("mid : " +manuscriptReview.getSubmissionInfor().getsId());
+//		System.out.println("mName : " +manuscriptReview.getSubmissionInfor().getsAuthorname());
+//				
+//		reviewService.saveManuscriptReview(manuscriptReview);
+//				
+//		//send mail for reviewer
+//		appUserService.emailForNotifyReviewer(appUser);
+		return "redirect:/updateStateSubmission/"+midMutiSending;
 	}
 }

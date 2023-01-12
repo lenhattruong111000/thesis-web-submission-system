@@ -236,6 +236,17 @@ public class MainController {
 			
 			model.addAttribute("acceptedListManuscripts", accpetedList);
 			
+			//view accepted without changing list
+			ArrayList<SubmissionInfor> acceptedWithoutChangingListManuscripts = new ArrayList<SubmissionInfor>();
+			for(int i=0; i<allList.size();i++) {
+				if(allList.get(i).getsState().equals("accept_without_changeable") &&
+						allList.get(i).getAppUser().getUserId().equals(appUser.getUserId())) {
+					acceptedWithoutChangingListManuscripts.add(allList.get(i));
+				}
+			}
+			
+			model.addAttribute("acceptedWithoutChangingListManuscripts", acceptedWithoutChangingListManuscripts);
+			
 			//view rejected list
 			ArrayList<SubmissionInfor> rejectedList = new ArrayList<SubmissionInfor>();
 			for(int i=0; i<allList.size();i++) {
