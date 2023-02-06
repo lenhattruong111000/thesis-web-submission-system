@@ -36,4 +36,9 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 			+ "app_user.USER_ID = user_role.USER_ID and \r\n"
 			+ "app_role.ROLE_ID=user_role.ROLE_ID and app_user.USER_NAME= :username", nativeQuery = true)
 	public String getUserRolebyUserName(@Param("username") String username);
+	
+	//get recommend reviewer list
+	@Query(value = "SELECT * FROM reviewer WHERE MATCH(master_field) AGAINST( :field IN NATURAL LANGUAGE MODE)", nativeQuery = true)
+	public List<AppUser> getRecommendReviewerList(@Param("field") String field);
+	
 }

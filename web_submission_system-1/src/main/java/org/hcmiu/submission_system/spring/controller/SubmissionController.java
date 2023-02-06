@@ -28,11 +28,13 @@ import org.hcmiu.submission_system.spring.entity.AppUser;
 import org.hcmiu.submission_system.spring.entity.CoAuthor;
 import org.hcmiu.submission_system.spring.entity.FileDB;
 import org.hcmiu.submission_system.spring.entity.ManuscriptReview;
+import org.hcmiu.submission_system.spring.entity.Reviewer;
 import org.hcmiu.submission_system.spring.entity.SubmissionInfor;
 import org.hcmiu.submission_system.spring.service.AppUserService;
 import org.hcmiu.submission_system.spring.service.CoAuthorService;
 import org.hcmiu.submission_system.spring.service.FileDBService;
 import org.hcmiu.submission_system.spring.service.ManuscriptReviewService;
+import org.hcmiu.submission_system.spring.service.ReviewerService;
 import org.hcmiu.submission_system.spring.service.SubmissionInforService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -75,6 +77,9 @@ public class SubmissionController {
 	@Autowired
 	private ManuscriptReviewService reviewService;
 	
+	@Autowired
+	private ReviewerService reviewerService;
+	
 	
 	@RequestMapping("/verify_first")
 	public String VerificationRequestMessage() {
@@ -84,6 +89,11 @@ public class SubmissionController {
 	public String errorEmail() {
 		return "emailError";
 	}
+	@RequestMapping("/oversizeMessage")
+	public String oversizeFile() {
+		return "oversizeMessage";
+	}
+	
 	
 	//======================================Submission Manuscript==================================//
 	@GetMapping("/submissionForm")
@@ -117,44 +127,48 @@ public class SubmissionController {
 	@PostMapping("/saveSubmissionInfor")
 	public String saveSubmissionForm(@ModelAttribute("manuscript") SubmissionInfor submissionInfor,
 			@RequestParam("file") MultipartFile file,  Model model, Principal principal) throws IOException{
-		//create new file
-		FileDB fileDB = new FileDB();
-		String fileName = file.getOriginalFilename();
-		fileDB.setFileName(fileName);
-		fileDB.setContent(file.getBytes());
-		fileDB.setSize(file.getSize());
-		fileDB.setType("manuscript"); 
-		fileDBService.saveFileDB(fileDB);
 		
-		//create new co-author
-		CoAuthor coauthor= new CoAuthor();
-		//set state for new submission
-		submissionInfor.setsState("waiting");
-		submissionInfor.setFileDB(fileDB);
-		submissionInforService.saveSubmissionInfor(submissionInfor);
-		//set Name and id for author
-		List<AppUser> listUser = appUserService.getAllAppUser();
-		for(int i=0; i<listUser.size();i++) {
-			if(listUser.get(i).getUserName().equals(principal.getName())) {
-				//submissionInfor.setAppUser(listUser.get(i));
-				submissionInforService.setNameAndIdForAuthor(listUser.get(i).getUserId(), listUser.get(i).getFullName(), submissionInfor.getsId());
-				 
-				//set information for new co-author
-				coauthor.setSubmissionInfor(submissionInfor);
-				coauthor.setCoFullname(listUser.get(i).getFullName());
-				coauthor.setCoEmail(listUser.get(i).getUserEmail());
-				coauthor.setCoOrganization(submissionInfor.getsWorkplace());
-				coauthor.setCoCountry(submissionInfor.getsCountry());
-				coauthor.setCoWebpage("");
-				coauthor.setCoCorrespondingauthor(true);
+		//50MB= 52428800 B
+		if(file.getSize()<= 52428800) {
+			FileDB fileDB = new FileDB();
+			String fileName = file.getOriginalFilename();
+			fileDB.setFileName(fileName);
+			fileDB.setContent(file.getBytes());
+			fileDB.setSize(file.getSize());
+			fileDB.setType("manuscript"); 
+			fileDBService.saveFileDB(fileDB);
+			
+			//create new co-author
+			CoAuthor coauthor= new CoAuthor();
+			//set state for new submission
+			submissionInfor.setsState("waiting");
+			submissionInfor.setFileDB(fileDB);
+			submissionInforService.saveSubmissionInfor(submissionInfor);
+			//set Name and id for author
+			List<AppUser> listUser = appUserService.getAllAppUser();
+			for(int i=0; i<listUser.size();i++) {
+				if(listUser.get(i).getUserName().equals(principal.getName())) {
+					//submissionInfor.setAppUser(listUser.get(i));
+					submissionInforService.setNameAndIdForAuthor(listUser.get(i).getUserId(), listUser.get(i).getFullName(), submissionInfor.getsId());
+					 
+					//set information for new co-author
+					coauthor.setSubmissionInfor(submissionInfor);
+					coauthor.setCoFullname(listUser.get(i).getFullName());
+					coauthor.setCoEmail(listUser.get(i).getUserEmail());
+					coauthor.setCoOrganization(submissionInfor.getsWorkplace());
+					coauthor.setCoCountry(submissionInfor.getsCountry());
+					coauthor.setCoWebpage("");
+					coauthor.setCoCorrespondingauthor(true);
+				}
 			}
-		}
-		
-		//fileDBService.setSubmissionInfoId(submissionInfor.getsId(), fileDB.getId());
-		//save new co-author
-		coAuthorService.saveCoAuthor(coauthor);
-		
-		return "redirect:/userInfo";
+			
+			//fileDBService.setSubmissionInfoId(submissionInfor.getsId(), fileDB.getId());
+			//save new co-author
+			coAuthorService.saveCoAuthor(coauthor);
+			
+			return "redirect:/userInfo";
+		 } 
+		return "/oversizeMessage";
 	}
 	//=======================================Co-Author====================================================//
 	//add co-author
@@ -228,11 +242,20 @@ public class SubmissionController {
 		}
 		//////
 		
-		//sidForUpdate=id;
+		//get submission information by s_id
+		SubmissionInfor submissionInfor = submissionInforService.getSubmissionInforById(id);
+		model.addAttribute("manuscript",submissionInfor);
+		
+		//=======================================================================//
+		
 		//get all reviewer 
 		List<AppUser> reviewerList= appUserService.getAllReviewer();
-		model.addAttribute("reviewerList",reviewerList);
-		 
+		//List<AppUser> recommendReviewerList = appUserService.getRecommendReviewerList(submissionInfor.getsMajor());
+		List<Reviewer> recommendReviewerList = reviewerService.getRecommentReviewerList(submissionInfor.getsMajor());
+		model.addAttribute("reviewerList",recommendReviewerList);
+		
+		//=======================================================================//
+				
 		//get review list by manuscript id
 		List<ManuscriptReview> reviewList= reviewService.getReviewListByManuscriptId(id);
 		model.addAttribute("reviewList", reviewList);
@@ -258,12 +281,6 @@ public class SubmissionController {
 		}catch(Exception e) {
 			System.out.println("not review yet");
 		}
-		
-	
-		
-		//get submission information by s_id
-		SubmissionInfor submissionInfor = submissionInforService.getSubmissionInforById(id);
-		model.addAttribute("manuscript",submissionInfor);
 			
 		return "updateStateSubmission";
 	}
@@ -282,29 +299,6 @@ public class SubmissionController {
         System.out.println("Logged successfully!\nToken:");
         System.out.println(token.getAccessToken());
         
-     // This example is going to scan a FILE for plagiarism.
-        // Alternatively, you can scan a URL using the class `UrlDocument`.
-        
-//        System.out.println("Submitting a new file...");
-//        String BASE64_FILE_CONTENT = null;
-//        String FILENAME = null;
-//        String scanId = null;
-//        SubmissionProperties submissionProperties = new SubmissionProperties(new SubmissionWebhooks("http://localhost:8080/copyleaks/{status}/SCAN_ID"));
-//        submissionProperties.setSandbox(true); //Turn on sandbox mode. Turn off on production.
-//        
-//        Optional<FileDB> temp = Optional.ofNullable(fileDBService.getFileDBById(sidForUpdate));
-//		if(temp!=null) {
-//			FileDB fileDB = temp.get();
-//			FILENAME =fileDB.getFileName();
-//			scanId= String.valueOf(fileDB.getSubmissionInfor().getsId());
-//			System.out.println("fileBD content"+fileDB.getContent());
-//			BASE64_FILE_CONTENT = Base64.getEncoder().encodeToString(fileDB.getContent().toString().getBytes(StandardCharsets.UTF_8));
-//			CopyleaksFileSubmissionModel model = new CopyleaksFileSubmissionModel(BASE64_FILE_CONTENT, FILENAME, null);
-//	        
-//			System.out.println("fileName: "+FILENAME);
-//			System.out.println("scanId: "+ scanId);
-//			System.out.println("BASE64_FILE_CONTENT: "+ BASE64_FILE_CONTENT);
-        	
         SubmissionProperties submissionProperties = new SubmissionProperties(new SubmissionWebhooks("https://localhost:8080/resultChecking"));
         String scanId= "1";
         	String url="http://localhost:8080/downloadfile/1";
@@ -673,22 +667,6 @@ public class SubmissionController {
 		System.out.println("deadline Date:"+request.getParameter("deadlineDate"));
 		System.out.println("deadline Time:"+request.getParameter("deadlineTime"));
 				
-//		manuscriptReview =new ManuscriptReview();		
-//		manuscriptReview.setSubmissionInfor(submissionInfor);
-//		manuscriptReview.setAppUser(appUser);
-//		manuscriptReview.setReviewerState("waiting");
-//		manuscriptReview.setsDeadlinedate(Date.valueOf(request.getParameter("deadlineDate")));
-//		manuscriptReview.setsDeadlinetime(Time.valueOf(request.getParameter("deadlineTime")+":00"));
-//				
-//		System.out.println("reviewerId: " +manuscriptReview.getAppUser().getUserId());
-//		System.out.println("reviewerName: " +manuscriptReview.getAppUser().getUserName());
-//		System.out.println("mid : " +manuscriptReview.getSubmissionInfor().getsId());
-//		System.out.println("mName : " +manuscriptReview.getSubmissionInfor().getsAuthorname());
-//				
-//		reviewService.saveManuscriptReview(manuscriptReview);
-//				
-//		//send mail for reviewer
-//		appUserService.emailForNotifyReviewer(appUser);
 		return "redirect:/updateStateSubmission/"+midMutiSending;
 	}
 }

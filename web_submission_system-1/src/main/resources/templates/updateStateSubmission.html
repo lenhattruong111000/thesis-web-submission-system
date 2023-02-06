@@ -173,6 +173,7 @@
 		<tr align="center">
 			<th>r_id
 			<th>r_Name
+			<th>r_fields
 			<th>r_Email
 			<th>r_Phone
 			<th>r_Select
@@ -180,15 +181,16 @@
 	</thead>
 	<tbody align="center">
 		<tr th:each=" reviewer : ${reviewerList}">
-			<td th:text="${reviewer.userId}"></td>
-			<td th:text="${reviewer.fullName}"></td>
-			<td th:text="${reviewer.userEmail}"></td>
-			<td th:text="${reviewer.userPhone}"></td>
+			<td th:text="${reviewer.getAppUser().getUserId()}"></td>
+			<td th:text="${reviewer.getAppUser().getFullName()}"></td>
+			<td th:text="${reviewer.getMasterField()}"></td>
+			<td th:text="${reviewer.getAppUser().getUserEmail}"></td>
+			<td th:text="${reviewer.getAppUser().getUserPhone}"></td>
 			<td>
-				<input type="checkbox" th:value= "${reviewer.userId}" name = "reviewerList">
+				<input type="checkbox" th:value= "${reviewer.getAppUser().getUserId()}" name = "reviewerList">
 			</td>
 			<td>
-				<a th:href=@{/send/{rid}/{mid}(rid=${reviewer.userId},mid=${manuscript.sId})}> Send</a>
+				<a th:href=@{/send/{rid}/{mid}(rid=${reviewer.getAppUser().getUserId()},mid=${manuscript.sId})}> Send</a>
 			</td>
 		</tr>
 	</tbody>

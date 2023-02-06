@@ -245,4 +245,10 @@ public class AppUserServiceImpl implements AppUserService{
 		
 	}
 
+	@Override
+	public List<AppUser> getRecommendReviewerList(String field) {
+		return this.appUserRepository.getRecommendReviewerList(field);
+		
+	}
+
 }

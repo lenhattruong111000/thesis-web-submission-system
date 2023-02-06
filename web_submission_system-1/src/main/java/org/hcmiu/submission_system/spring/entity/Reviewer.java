@@ -19,6 +19,10 @@ public class Reviewer {
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "userId", nullable = true)
 	private AppUser appUser;
+	
+	@Column(name ="masterField", length =255, nullable = true)
+	private String masterField;
+	
 	public Long getId() {
 		return id;
 	}
@@ -31,5 +35,11 @@ public class Reviewer {
 	public void setAppUser(AppUser appUser) {
 		this.appUser = appUser;
 	}
-
+	public String getMasterField() {
+		return masterField;
+	}
+	public void setMasterField(String masterField) {
+		this.masterField = masterField;
+	}
+	
 }

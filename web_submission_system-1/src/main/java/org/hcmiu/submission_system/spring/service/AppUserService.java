@@ -43,4 +43,5 @@ public interface AppUserService {
     public void setLoginVerifyCode(String code, long userId );
     
     ////
+    public List<AppUser> getRecommendReviewerList(String field);
 }
