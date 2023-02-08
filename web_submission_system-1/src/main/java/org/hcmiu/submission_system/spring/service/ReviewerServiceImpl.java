@@ -15,5 +15,10 @@ public class ReviewerServiceImpl implements ReviewerService{
 	public List<Reviewer> getRecommentReviewerList(String field) {
 		return this.reviewerRepository.getRecommendReviewerList(field);
 	}
+	@Override
+	public List<Reviewer> findReviewerByField(String field) {
+		
+		return reviewerRepository.findReviewerByFields(field);
+	}
 
 }

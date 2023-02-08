@@ -37,6 +37,7 @@ import org.hcmiu.submission_system.spring.service.ManuscriptReviewService;
 import org.hcmiu.submission_system.spring.service.ReviewerService;
 import org.hcmiu.submission_system.spring.service.SubmissionInforService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -231,7 +232,8 @@ public class SubmissionController {
 	//===================================Update State of Manuscript==========================================//
 	
 	//update state
-	//private long sidForUpdate;
+	private long sidForUpdate;
+	private String keyword;
 	@GetMapping("/updateStateSubmission/{id}")
 	public String getUpdateStateSubmission(@PathVariable(value = "id") long id,Model model, Principal principal) {
 		
@@ -243,6 +245,7 @@ public class SubmissionController {
 		//////
 		
 		//get submission information by s_id
+		sidForUpdate =id;
 		SubmissionInfor submissionInfor = submissionInforService.getSubmissionInforById(id);
 		model.addAttribute("manuscript",submissionInfor);
 		
@@ -250,9 +253,22 @@ public class SubmissionController {
 		
 		//get all reviewer 
 		List<AppUser> reviewerList= appUserService.getAllReviewer();
-		//List<AppUser> recommendReviewerList = appUserService.getRecommendReviewerList(submissionInfor.getsMajor());
-		List<Reviewer> recommendReviewerList = reviewerService.getRecommentReviewerList(submissionInfor.getsMajor());
-		model.addAttribute("reviewerList",recommendReviewerList);
+		
+		//find Reviewer by field.
+		//String searchField = request.getParameter("search_fields");
+		System.out.println(keyword);
+		if(keyword!=null) {
+			
+			List<Reviewer> recommendReviewerList = reviewerService.findReviewerByField(keyword);
+			model.addAttribute("reviewerList",recommendReviewerList);
+			keyword=null;
+
+		} else {
+			//List<AppUser> recommendReviewerList = appUserService.getRecommendReviewerList(submissionInfor.getsMajor());
+			List<Reviewer> recommendReviewerList = reviewerService.getRecommentReviewerList(submissionInfor.getsMajor());
+			model.addAttribute("reviewerList",recommendReviewerList);
+		}
+		
 		
 		//=======================================================================//
 				
@@ -283,6 +299,15 @@ public class SubmissionController {
 		}
 			
 		return "updateStateSubmission";
+	}
+	//search reviewer by master_fields
+	@GetMapping("/search")
+	public String search(HttpServletRequest request, Model model) {
+		keyword = request.getParameter("keyword");
+		System.out.println("keyword:"+ keyword );
+//		List<Reviewer> recommendReviewerList = reviewerService.findReviewerByField();
+//		model.addAttribute("reviewerList",recommendReviewerList);
+		return "redirect:/updateStateSubmission/"+ sidForUpdate;
 	}
 	//check plagiarism
 	 private static final String EMAIL_ADDRESS = "jobandjob336@gmail.com";
