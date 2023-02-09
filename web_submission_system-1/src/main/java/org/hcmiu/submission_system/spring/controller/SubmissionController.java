@@ -380,7 +380,11 @@ public class SubmissionController {
 		
 		//get mauscript and sent email about its state, comment for author
 		SubmissionInfor submission = submissionInforService.getSubmissionInforById(submissionInfor.getsId());
-		appUserService.emailForNotifyAuthorAboutSubmissionState(submission.getAppUser(), submission);
+		List<CoAuthor> coAuthors = coAuthorService.getCoAuhtorListByManuscriptId(submissionInfor.getsId());
+		for(int i=0; i<coAuthors.size();i++) {
+			coAuthorService.emailForNotifyAuthorAndCoAuthorAboutSubmissionState(coAuthors.get(i), submission);
+		}
+		//appUserService.emailForNotifyAuthorAboutSubmissionState(submission.getAppUser(), submission);
 		return "redirect:/editor";
 	}
 	

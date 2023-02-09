@@ -6,6 +6,7 @@ import java.util.List;
 import javax.mail.MessagingException;
 
 import org.hcmiu.submission_system.spring.entity.AppUser;
+import org.hcmiu.submission_system.spring.entity.CoAuthor;
 import org.hcmiu.submission_system.spring.entity.SubmissionInfor;
 
 public interface AppUserService {
@@ -34,6 +35,8 @@ public interface AppUserService {
     public void emailForNotifyReviewer(AppUser appUser) throws MessagingException, UnsupportedEncodingException;
     
     public void emailForNotifyAuthorAboutSubmissionState(AppUser appUser, SubmissionInfor submissionInfor) throws MessagingException, UnsupportedEncodingException;
+    
+    public void emailForNotifyAuthorAndCoAuthorAboutSubmissionState(CoAuthor coauthor, SubmissionInfor submissionInfor) throws MessagingException, UnsupportedEncodingException;
     
     public void emailLoginVerify(AppUser appUser) throws MessagingException, UnsupportedEncodingException;
     

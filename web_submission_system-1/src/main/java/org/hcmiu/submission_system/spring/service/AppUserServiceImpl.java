@@ -8,6 +8,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.hcmiu.submission_system.spring.entity.AppUser;
+import org.hcmiu.submission_system.spring.entity.CoAuthor;
 import org.hcmiu.submission_system.spring.entity.SubmissionInfor;
 import org.hcmiu.submission_system.spring.repository.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -248,6 +249,36 @@ public class AppUserServiceImpl implements AppUserService{
 	@Override
 	public List<AppUser> getRecommendReviewerList(String field) {
 		return this.appUserRepository.getRecommendReviewerList(field);
+		
+	}
+
+	@Override
+	public void emailForNotifyAuthorAndCoAuthorAboutSubmissionState(CoAuthor coauthor, SubmissionInfor submissionInfor)
+			throws MessagingException, UnsupportedEncodingException {
+		String toAddress = coauthor.getCoEmail();
+	    String fromAddress = fromEmailAddress();
+	    String senderName = "Submission_System";
+	    String subject = "Manuscript State";
+	    String content = "Dear "+coauthor.getCoFullname()+",<br>"
+	    		+ "Manuscript ID: "+submissionInfor.getsId() +"<br>"
+	    		+ "Title: "+submissionInfor.getsTitle()+"<br>"
+	    		+ "State: "+submissionInfor.getsState()+"<br>"
+	    		+ "Comment: <br>"
+	    		+ submissionInfor.getsComment() +"<br>"
+	            + "Please, login to the system for more details.<br>"
+	            + "Best regards,<br>"
+	            + "Submission_System.";
+	     
+	    MimeMessage message = javaMailSender.createMimeMessage();
+	    MimeMessageHelper helper = new MimeMessageHelper(message);
+	     
+	    helper.setFrom(fromAddress, senderName);
+	    helper.setTo(toAddress);
+	    helper.setSubject(subject);
+	     
+	    helper.setText(content, true);
+	     
+	    javaMailSender.send(message);
 		
 	}
 

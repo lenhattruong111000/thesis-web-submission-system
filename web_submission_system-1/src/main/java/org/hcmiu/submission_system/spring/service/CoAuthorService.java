@@ -23,4 +23,9 @@ public interface CoAuthorService {
     
     //send notification email for co-author
     public void notificationEmailForCoAuthor(CoAuthor coAuthor) throws MessagingException, UnsupportedEncodingException;
+    
+    //get co-author list by manuscript id
+    public List<CoAuthor> getCoAuhtorListByManuscriptId(long id);
+    
+    public void emailForNotifyAuthorAndCoAuthorAboutSubmissionState(CoAuthor coauthor, SubmissionInfor submissionInfor) throws MessagingException, UnsupportedEncodingException;
 }

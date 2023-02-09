@@ -81,4 +81,44 @@ public class CoAuthorServiceImpl implements CoAuthorService{
 		
 	}
 
+	@Override
+	public List<CoAuthor> getCoAuhtorListByManuscriptId(long id) {
+		
+		return this.coAuthorRespository.findListCoAuthorByManuscriptId(id);
+	}
+	
+	private String fromEmailAddress() {
+		return "jobandjob336@gmail.com";
+	}
+	
+	@Override
+	public void emailForNotifyAuthorAndCoAuthorAboutSubmissionState(CoAuthor coauthor, SubmissionInfor submissionInfor)
+			throws MessagingException, UnsupportedEncodingException {
+		String toAddress = coauthor.getCoEmail();
+	    String fromAddress = fromEmailAddress();
+	    String senderName = "Submission_System";
+	    String subject = "Manuscript State";
+	    String content = "Dear "+coauthor.getCoFullname()+",<br>"
+	    		+ "Manuscript ID: "+submissionInfor.getsId() +"<br>"
+	    		+ "Title: "+submissionInfor.getsTitle()+"<br>"
+	    		+ "State: "+submissionInfor.getsState()+"<br>"
+	    		+ "Comment: <br>"
+	    		+ submissionInfor.getsComment() +"<br>"
+	            + "Please, login to the system for more details.<br>"
+	            + "Best regards,<br>"
+	            + "Submission_System.";
+	     
+	    MimeMessage message = javaMailSender.createMimeMessage();
+	    MimeMessageHelper helper = new MimeMessageHelper(message);
+	     
+	    helper.setFrom(fromAddress, senderName);
+	    helper.setTo(toAddress);
+	    helper.setSubject(subject);
+	     
+	    helper.setText(content, true);
+	     
+	    javaMailSender.send(message);
+		
+	}
+
 }
