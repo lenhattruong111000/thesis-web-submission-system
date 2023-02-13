@@ -90,22 +90,33 @@
 		
 		<tr align="left" hidden="">
 			<th> Author Name:</th>
-			<th > <input type="text" name="authorName" ></th>
+			<th > <input type="text" name="authorName"  ></th>
 		</tr>
 		
 		<tr align="left" >
 			<th>Workplace:</th>
-			<th> <input type="text" required="required" name="authorworkplace" th:field="*{sWorkplace}"> </th>
+			<th> <input type="text" required="required" name="authorworkplace" th:field="*{sWorkplace}" > </th>
 		</tr>
 		
 		<tr align="left" >
 			<th>Country:</th>
-			<th> <input type="text" required="required" name="country" th:field="*{sCountry}"> </th>
+			<th> <input type="text" required="required" name="country" th:field="*{sCountry}" > </th>
+		</tr>
+		
+		<tr> 
+		<th></th>
+		<th> <h6 style="color: red;">(*) the article must have from 1 to 5 keywords and separated by a new line. </h6> </th>
 		</tr>
 		
 		<tr align="left" >
 			<th>Keyword:</th>
-			<th> <input type="text" required="required" name="keyword" th:field="*{sKeyword}"> </th>
+			<th > <textarea rows="5" cols="50" required="required" name="keyword" th:field="*{sKeyword}"></textarea> </th>
+			<!--  <th> <input type="text" required="required" name="keyword" th:field="*{sKeyword}"> </th>-->
+		</tr>
+		
+		<tr> 
+		<th></th>
+		<th> <h6 style="color: red;">(*) the abstract paragraph must from 200 to 300 words. </h6> </th>
 		</tr>
 		
 		<tr align="left">

@@ -1,8 +1,11 @@
 package org.hcmiu.submission_system.spring.controller;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.Principal;
 import java.sql.Date;
 import java.sql.Time;
@@ -24,6 +27,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.hcmiu.submission_system.spring.entity.AppUser;
 import org.hcmiu.submission_system.spring.entity.CoAuthor;
 import org.hcmiu.submission_system.spring.entity.FileDB;
@@ -33,6 +37,7 @@ import org.hcmiu.submission_system.spring.entity.SubmissionInfor;
 import org.hcmiu.submission_system.spring.service.AppUserService;
 import org.hcmiu.submission_system.spring.service.CoAuthorService;
 import org.hcmiu.submission_system.spring.service.FileDBService;
+import org.hcmiu.submission_system.spring.service.FileDBServiceImpl;
 import org.hcmiu.submission_system.spring.service.ManuscriptReviewService;
 import org.hcmiu.submission_system.spring.service.ReviewerService;
 import org.hcmiu.submission_system.spring.service.SubmissionInforService;
@@ -95,6 +100,14 @@ public class SubmissionController {
 		return "oversizeMessage";
 	}
 	
+	@RequestMapping("/overLenghtMessage")
+	public String overLenghtMessage(Model model) {
+		model.addAttribute("wordsCounted", wordsCounted );
+		model.addAttribute("keywordNum", keywordNum );
+		model.addAttribute("pageNumPDf", pageNumPDf );
+		return "overLengthMessage";
+	}
+	
 	
 	//======================================Submission Manuscript==================================//
 	@GetMapping("/submissionForm")
@@ -123,53 +136,140 @@ public class SubmissionController {
 		}
 		
 	}
-	
-	
+	private int keywordNum=0;
+	private int wordsCounted=0; 
+	private int pageNumPDf=0;
 	@PostMapping("/saveSubmissionInfor")
 	public String saveSubmissionForm(@ModelAttribute("manuscript") SubmissionInfor submissionInfor,
 			@RequestParam("file") MultipartFile file,  Model model, Principal principal) throws IOException{
+		String abstractParagraph =submissionInfor.getsAbstract();
+		final char SPACE =' ';
+		final char BREAK_LINE = '\n';
+		final char TAB ='\n';
 		
-		//50MB= 52428800 B
-		if(file.getSize()<= 52428800) {
-			FileDB fileDB = new FileDB();
-			String fileName = file.getOriginalFilename();
-			fileDB.setFileName(fileName);
-			fileDB.setContent(file.getBytes());
-			fileDB.setSize(file.getSize());
-			fileDB.setType("manuscript"); 
-			fileDBService.saveFileDB(fileDB);
+		//keyword counted
+		String allKeyword= submissionInfor.getsKeyword();
+		keywordNum=0;
+		boolean isCounted = true;
+		
+		for(int i=0; i<allKeyword.length();i++) {
+			if (allKeyword.charAt(i) != BREAK_LINE) {
+                         
+                if(isCounted==true) {
+                    System.out.println(allKeyword.charAt(i)+"_");
+                    keywordNum++;
+                    isCounted = false;
+                }
+            } else {
+                isCounted = true;
+            }
+		}
+		System.out.println("number of keyword: "+ keywordNum);
+		
+		
+		// words counted (abstract paragraph) 
+        int count = 0;
+        isCounted = true;
+        
+        for (int i = 0; i < abstractParagraph.length(); i++) {
+            if ( abstractParagraph.charAt(i) != SPACE && abstractParagraph.charAt(i) != TAB 
+                    && abstractParagraph.charAt(i) != BREAK_LINE) {
+                         
+                if(isCounted==true) {
+                    System.out.println(abstractParagraph.charAt(i)+"_");
+                    count++;
+                    isCounted = false;
+                }
+            } else {
+                isCounted = true;
+            }
+        }
+        
+        System.out.println("wordsCount: "+ count);
+        //wordsCounted =String.valueOf(count);
+        wordsCounted =count;
+        
+        // the abstract paragraph length from 200 to 300 words.
+        if(count<=300 && count>=200 && keywordNum>= 1 && keywordNum<=5) {
+        	//get file extension
+    		String nameFile= file.getOriginalFilename();
+			String fileExtension = null;
+        	try {
+        	
+			System.out.println("length: "+nameFile.length());
+			for(int i=nameFile.length()-1;i>=0;i--) {
+				
+				System.out.println(nameFile.charAt(i));
+				if(nameFile.charAt(i)=='.') {
+					System.out.println(i);
+					fileExtension =nameFile.substring(i+1,nameFile.length());
+					break;
+				}		
+			}
+			System.out.println(nameFile);
+			System.out.println("Flie Extension: "+fileExtension);
 			
-			//create new co-author
-			CoAuthor coauthor= new CoAuthor();
-			//set state for new submission
-			submissionInfor.setsState("waiting");
-			submissionInfor.setFileDB(fileDB);
-			submissionInforService.saveSubmissionInfor(submissionInfor);
-			//set Name and id for author
-			List<AppUser> listUser = appUserService.getAllAppUser();
-			for(int i=0; i<listUser.size();i++) {
-				if(listUser.get(i).getUserName().equals(principal.getName())) {
-					//submissionInfor.setAppUser(listUser.get(i));
-					submissionInforService.setNameAndIdForAuthor(listUser.get(i).getUserId(), listUser.get(i).getFullName(), submissionInfor.getsId());
-					 
-					//set information for new co-author
-					coauthor.setSubmissionInfor(submissionInfor);
-					coauthor.setCoFullname(listUser.get(i).getFullName());
-					coauthor.setCoEmail(listUser.get(i).getUserEmail());
-					coauthor.setCoOrganization(submissionInfor.getsWorkplace());
-					coauthor.setCoCountry(submissionInfor.getsCountry());
-					coauthor.setCoWebpage("");
-					coauthor.setCoCorrespondingauthor(true);
-				}
+			if(fileExtension.equals("pdf")) {
+				 PDDocument documentPdf= PDDocument.load(file.getBytes());
+				 pageNumPDf= documentPdf.getNumberOfPages();
+				 System.out.println("Number of pdf page"+ pageNumPDf);
+				 documentPdf.close();
 			}
 			
-			//fileDBService.setSubmissionInfoId(submissionInfor.getsId(), fileDB.getId());
-			//save new co-author
-			coAuthorService.saveCoAuthor(coauthor);
+			if(fileExtension.equals("pdf") && (pageNumPDf>20 || pageNumPDf< 10)) {
+        		return "redirect:/overLenghtMessage";
+        	}
+        		
+			} catch (Exception e) {
+				System.out.println("can not find number of page");
+			}
+        	
+        	
+        	//50MB= 52428800 B
+        	if(file.getSize()<= 52428800 ) {
+        		
+        		FileDB fileDB = new FileDB();
+        		String fileName = file.getOriginalFilename();
+        		fileDB.setFileName(fileName);
+        		fileDB.setContent(file.getBytes());
+        		fileDB.setSize(file.getSize());
+        		fileDB.setType("manuscript"); 
+        		fileDBService.saveFileDB(fileDB);
 			
-			return "redirect:/userInfo";
-		 } 
-		return "/oversizeMessage";
+        		//create new co-author
+        		CoAuthor coauthor= new CoAuthor();
+        		//set state for new submission
+        		submissionInfor.setsState("waiting");
+        		submissionInfor.setFileDB(fileDB);
+        		submissionInforService.saveSubmissionInfor(submissionInfor);
+        		//set Name and id for author
+        		List<AppUser> listUser = appUserService.getAllAppUser();
+        		for(int i=0; i<listUser.size();i++) {
+        			if(listUser.get(i).getUserName().equals(principal.getName())) {
+        				//submissionInfor.setAppUser(listUser.get(i));
+        				submissionInforService.setNameAndIdForAuthor(listUser.get(i).getUserId(), listUser.get(i).getFullName(), submissionInfor.getsId());
+					 
+        				//set information for new co-author
+        				coauthor.setSubmissionInfor(submissionInfor);
+        				coauthor.setCoFullname(listUser.get(i).getFullName());
+        				coauthor.setCoEmail(listUser.get(i).getUserEmail());
+        				coauthor.setCoOrganization(submissionInfor.getsWorkplace());
+        				coauthor.setCoCountry(submissionInfor.getsCountry());
+        				coauthor.setCoWebpage("");
+        				coauthor.setCoCorrespondingauthor(true);
+        			}
+        		}
+			
+        		//fileDBService.setSubmissionInfoId(submissionInfor.getsId(), fileDB.getId());
+        		//save new co-author
+        		coAuthorService.saveCoAuthor(coauthor);
+			
+        		return "redirect:/userInfo";
+			
+        	} else return "/oversizeMessage";
+        }
+       
+		return "redirect:/overLenghtMessage";
 	}
 	//=======================================Co-Author====================================================//
 	//add co-author
