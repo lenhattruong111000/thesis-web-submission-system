@@ -20,14 +20,14 @@
 <h1>The number of keywords must from 1 to 5 keywords.</h1>
 </div>
 
-<div th:if="${wordsCounted &lt; 200 || wordsCounted &gt; 300}">
+<div th:if="${wordsCounted &lt; 100 || wordsCounted &gt; 200}">
 <h1> Total words of your abstract paragraph is <span  th:utext="${wordsCounted}"></span> words.</h1>
-<h1> Your abstract paragraph must between 200 to 300 words.  </h1>
+<h1> Your abstract paragraph must between 100 to 200 words.  </h1>
 </div>
 
-<div th:if="${pageNumPDf &lt; 10 || pageNumPDf &gt; 20}">
-<h1> Total pages in pdf file(journal article) is <span  th:utext="${pageNumPDf}"></span> words.</h1>
-<h1> Your total page must from 10 to 20 pages.  </h1>
+<div th:if="${(pageNumPDf &lt; 5 || pageNumPDf &gt; 20) &amp;&amp; pageNumPDf != 0 }">
+<h1> Total pages in pdf file(journal article) is <span  th:utext="${pageNumPDf}"></span> pages.</h1>
+<h1> Your total page must from 5 to 20 pages.  </h1>
 <h1> If your submission is a different type with a journal article, Please, compress it to zip file before submitting. </h1>
 </div>
 

@@ -189,8 +189,8 @@ public class SubmissionController {
         //wordsCounted =String.valueOf(count);
         wordsCounted =count;
         
-        // the abstract paragraph length from 200 to 300 words.
-        if(count<=300 && count>=200 && keywordNum>= 1 && keywordNum<=5) {
+        // the abstract paragraph length from 100 to 200 words.
+        if(count<=200 && count>=100 && keywordNum>= 1 && keywordNum<=5) {
         	//get file extension
     		String nameFile= file.getOriginalFilename();
 			String fileExtension = null;
@@ -216,7 +216,7 @@ public class SubmissionController {
 				 documentPdf.close();
 			}
 			
-			if(fileExtension.equals("pdf") && (pageNumPDf>20 || pageNumPDf< 10)) {
+			if(fileExtension.equals("pdf") && (pageNumPDf>20 || pageNumPDf< 5)) {
         		return "redirect:/overLenghtMessage";
         	}
         		
@@ -581,7 +581,7 @@ public class SubmissionController {
 		for(int i=0; i<submissionInfors.size();i++) {
 			if(submissionInfors.get(i).getAppUser().getUserId().equals(appUser.getUserId()) &&
 					submissionInfors.get(i).getsId().equals(Long.valueOf(sid))&&
-					submissionInfors.get(i).getsState().equals("accept_without_changeable")) {
+					submissionInfors.get(i).getsState().equals("formal_accepted")) {
 				FileDB fileDB = fileDBService.getFileDBById(Long.valueOf(submissionInfors.get(i).getFileDB().getId()));
 				
 				fileDB.setType("manuscript/finalSubmit");

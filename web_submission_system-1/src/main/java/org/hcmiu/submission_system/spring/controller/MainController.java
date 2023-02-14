@@ -102,8 +102,8 @@ public class MainController {
 		//view accepted manuscript
 		ArrayList<SubmissionInfor> acceptedList = new ArrayList<SubmissionInfor>();
 		for(int i=0; i<allList.size();i++) {
-			if(allList.get(i).getsState().equals("accept_with_small_changeable")||
-					allList.get(i).getsState().equals("accept_with_changeable")	) {
+			if(allList.get(i).getsState().equals("minor_accepted")||
+					allList.get(i).getsState().equals("major_accepted")	) {
 				acceptedList.add(allList.get(i));
 			}
 		}
@@ -226,8 +226,8 @@ public class MainController {
 			// view accepted list
 			ArrayList<SubmissionInfor> accpetedList = new ArrayList<SubmissionInfor>();
 			for(int i=0; i<allList.size();i++) {
-				if(allList.get(i).getsState().equals("accept_with_small_changeable") || 
-						allList.get(i).getsState().equals("accept_with_changeable") &&
+				if(allList.get(i).getsState().equals("minor_accepted") || 
+						allList.get(i).getsState().equals("major_accepted") &&
 						allList.get(i).getAppUser().getUserId().equals(appUser.getUserId())) {
 					
 					accpetedList.add(allList.get(i));
@@ -239,7 +239,7 @@ public class MainController {
 			//view accepted without changing list
 			ArrayList<SubmissionInfor> acceptedWithoutChangingListManuscripts = new ArrayList<SubmissionInfor>();
 			for(int i=0; i<allList.size();i++) {
-				if(allList.get(i).getsState().equals("accept_without_changeable") &&
+				if(allList.get(i).getsState().equals("formal_accepted") &&
 						allList.get(i).getAppUser().getUserId().equals(appUser.getUserId())) {
 					acceptedWithoutChangingListManuscripts.add(allList.get(i));
 				}
