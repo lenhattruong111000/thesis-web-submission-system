@@ -16,6 +16,6 @@ public interface ReviewerRepository extends JpaRepository<Reviewer, Long> {
 	public List<Reviewer> getRecommendReviewerList(@Param("field") String field);
 	
 	//search reviewer by fields
-	@Query(value =  "SELECT * FROM reviewer r WHERE r.master_field like %:field%", nativeQuery = true)
+	@Query(value =  "SELECT * FROM reviewer r WHERE match(master_field) against(:field in natural language mode)", nativeQuery = true)
 	public List<Reviewer> findReviewerByFields(@Param("field") String field);
 }

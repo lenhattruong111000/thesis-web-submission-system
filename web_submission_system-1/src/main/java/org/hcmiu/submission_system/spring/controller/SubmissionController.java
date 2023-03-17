@@ -484,6 +484,7 @@ public class SubmissionController {
 		for(int i=0; i<coAuthors.size();i++) {
 			coAuthorService.emailForNotifyAuthorAndCoAuthorAboutSubmissionState(coAuthors.get(i), submission);
 		}
+		reviewService.deleteManuscriptReviewBySid(submission.getsId());
 		//appUserService.emailForNotifyAuthorAboutSubmissionState(submission.getAppUser(), submission);
 		return "redirect:/editor";
 	}
@@ -524,30 +525,137 @@ public class SubmissionController {
 	@PostMapping("/saveResubmit")
 	public String saveResubmitManuscript(@RequestParam("file") MultipartFile file, 
 			@ModelAttribute("manuscript") SubmissionInfor manuscript) throws IOException {
+		
 		SubmissionInfor submissionInfor =submissionInforService.getSubmissionInforById(manuscript.getsId());
 		System.out.println("id: "+submissionInfor.getsId());
 		
 		System.out.println("name:"+submissionInfor.getsTitle());
 		System.out.println("file Id: "+ submissionInfor.getFileDB().getId());
-		// get file submission by file id
-		FileDB fileDB = fileDBService.getFileDBById(submissionInfor.getFileDB().getId());
-		String fileName = file.getOriginalFilename();
-		fileDB.setFileName(fileName);
-		fileDB.setContent(file.getBytes());
-		fileDB.setSize(file.getSize());
-		fileDB.setType("manuscript");
-		fileDBService.saveFileDB(fileDB);
 		
-		if(submissionInfor.getsState().equals("waiting")==false) {
-			submissionInfor.setsState("re-submit");
-		}else {
-			submissionInfor.setsState("waiting");
+		submissionInfor.setsTitle(manuscript.getsTitle());
+		submissionInfor.setsAbstract(manuscript.getsAbstract());
+		submissionInfor.setsMajor(manuscript.getsMajor());
+		submissionInfor.setsWorkplace(manuscript.getsWorkplace());
+		submissionInfor.setsKeyword(manuscript.getsKeyword());
+		submissionInfor.setsCountry(manuscript.getsCountry());
+		
+		////////////////////////
+		String abstractParagraph =submissionInfor.getsAbstract();
+		final char SPACE =' ';
+		final char BREAK_LINE = '\n';
+		final char TAB ='\n';
+		
+		//keyword counted
+		String allKeyword= submissionInfor.getsKeyword();
+		keywordNum=0;
+		boolean isCounted = true;
+		
+		for(int i=0; i<allKeyword.length();i++) {
+			if (allKeyword.charAt(i) != BREAK_LINE) {
+                         
+                if(isCounted==true) {
+                    System.out.println(allKeyword.charAt(i)+"_");
+                    keywordNum++;
+                    isCounted = false;
+                }
+            } else {
+                isCounted = true;
+            }
 		}
+		System.out.println("number of keyword: "+ keywordNum);
 		
-		submissionInforService.saveSubmissionInfor(submissionInfor);
-		submissionInforService.updateFileId(fileDB.getId(), submissionInfor.getsId());
-		reviewService.deleteManuscriptReviewBySid(submissionInfor.getsId());
-		return "redirect:/userInfo";
+		
+		// words counted (abstract paragraph) 
+        int count = 0;
+        isCounted = true;
+        
+        for (int i = 0; i < abstractParagraph.length(); i++) {
+            if ( abstractParagraph.charAt(i) != SPACE && abstractParagraph.charAt(i) != TAB 
+                    && abstractParagraph.charAt(i) != BREAK_LINE) {
+                         
+                if(isCounted==true) {
+                    System.out.println(abstractParagraph.charAt(i)+"_");
+                    count++;
+                    isCounted = false;
+                }
+            } else {
+                isCounted = true;
+            }
+        }
+        
+        System.out.println("wordsCount: "+ count);
+        //wordsCounted =String.valueOf(count);
+        wordsCounted =count;
+        
+        // the abstract paragraph length from 100 to 200 words.
+        if(count<=200 && count>=100 && keywordNum>= 1 && keywordNum<=5) {
+        	//get file extension
+    		String nameFile= file.getOriginalFilename();
+			String fileExtension = null;
+        	try {
+        	
+			System.out.println("length: "+nameFile.length());
+			for(int i=nameFile.length()-1;i>=0;i--) {
+				
+				System.out.println(nameFile.charAt(i));
+				if(nameFile.charAt(i)=='.') {
+					System.out.println(i);
+					fileExtension =nameFile.substring(i+1,nameFile.length());
+					break;
+				}		
+			}
+			System.out.println(nameFile);
+			System.out.println("Flie Extension: "+fileExtension);
+			
+			if(fileExtension.equals("pdf")) {
+				 PDDocument documentPdf= PDDocument.load(file.getBytes());
+				 pageNumPDf= documentPdf.getNumberOfPages();
+				 System.out.println("Number of pdf page"+ pageNumPDf);
+				 documentPdf.close();
+			}
+			
+			if(fileExtension.equals("pdf") && (pageNumPDf>20 || pageNumPDf< 5)) {
+        		return "redirect:/overLenghtMessage";
+        	}
+        		
+			} catch (Exception e) {
+				System.out.println("can not find number of page");
+			}
+        	
+        	
+        	//50MB= 52428800 B
+        	if(file.getSize()<= 52428800 ) {
+        		FileDB fileDB = fileDBService.getFileDBById(submissionInfor.getFileDB().getId());
+        		String fileName = file.getOriginalFilename();
+        		fileDB.setFileName(fileName);
+        		fileDB.setContent(file.getBytes());
+        		fileDB.setSize(file.getSize());
+        		fileDB.setType("manuscript");
+        		fileDBService.saveFileDB(fileDB);
+        		
+
+        		if(submissionInfor.getsState().equals("waiting")==false) {
+        			submissionInfor.setsState("re-submit");
+        		}else {
+        			submissionInfor.setsState("waiting");
+        		}
+        		
+        		submissionInforService.saveSubmissionInfor(submissionInfor);
+        		submissionInforService.updateFileId(fileDB.getId(), submissionInfor.getsId());
+        		reviewService.deleteManuscriptReviewBySid(submissionInfor.getsId());
+        		
+        		return "redirect:/userInfo";
+			
+        	} else return "/oversizeMessage";
+        }
+		
+		////////////////////////
+		
+		// get file submission by file id
+		
+		
+//		return "redirect:/userInfo";
+        return "redirect:/overLenghtMessage";
 	}
 	
 	//==========================================Final Submission============================================//
@@ -790,6 +898,7 @@ public class SubmissionController {
 			//send mail for reviewer
 			appUserService.emailForNotifyReviewer(reviewer);
 		}
+		reviewerList.clear();
 		
 		
 				
