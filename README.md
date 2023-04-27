@@ -25,7 +25,7 @@ Guide details fro Eclipse IDE(having all tools to support Spring Boot Project Ru
 2. Open Eclipse IDE, and select the workplace that contains the project(Select the directory of project)
 3. Press 'Launch' button to access the new workplace
 4. Select File -> Open Project from File System...
-5. input the direction of project to Import source the press 'Finish' button
+5. input the direction of project to 'Import source' then press 'Finish' button
 6. Use MySQL to excecute sql_submission.sql file to create the database 
 7. Open file application.properties with direction: /web_submission_system-1/src/main/resources/application.properties
 8. In application.properties file, change username and password to access MySQL database, also change the username and password to use an email smtp
