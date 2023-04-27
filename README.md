@@ -33,3 +33,7 @@ Guide details fro Eclipse IDE(having all tools to support Spring Boot Project Ru
 10. Run file WebSubmissionSystem1Application.java as Spring Boot App
 11. Now, project are running.
 
+-- ------------------------------------------------------------------------------
+Web Submission System design by Le Nhat Truong - ITITIU18257 
+From VIETNAM NATIONAL UNIVERSITY OF HOCHIMINH CITY - THE INTERNATIONAL UNIVERSITY
+
